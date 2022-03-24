@@ -1,40 +1,58 @@
 import autoComplete from "@tarekraafat/autocomplete.js";
 
-export const autoCompleteJS = new autoComplete({
-    selector: "#autoComplete",
-    placeHolder: "Search for Food...",
-    data: {
-        src: [
-            "Sauce - Thousand Island",
-            "Wild Boar - Tenderloin",
-            "Goat - Whole Cut",
-        ],
-        cache: true,
-    },
-    resultsList: {
-        element: (list, data) => {
-            if (!data.results.length) {
-                // Create "No Results" message element
-                const message = document.createElement("div");
-                // Add class to the created element
-                message.setAttribute("class", "no_result");
-                // Add message text content
-                message.innerHTML = `<span>Found No Results for "${data.query}"</span>`;
-                // Append message element to the results list
-                list.prepend(message);
-            }
+let currAC;
+let lastSelectedVal, nowOpen;
+let i = 0;
+
+export const genAC = (selectorElem) => {
+    currAC?.close();
+    lastSelectedVal = undefined;
+    nowOpen = false;
+    currAC = new autoComplete({
+        data: {
+            src: [
+                { id: 1, name: "one" },
+                { id: 2, name: "two" },
+                { id: 3, name: "three" },
+                { id: 4, name: "èèèat" },
+            ],
+            cache: true,
+            keys: ["name"],
         },
-        noResults: true,
-    },
-    resultItem: {
-        highlight: true,
-    },
-    events: {
-        input: {
-            selection: (event) => {
-                const selection = event.detail.selection.value;
-                autoCompleteJS.input.value = selection;
+        resultItem: {
+            highlight: true,
+        },
+        events: {
+            input: {
+                selection: (event) => {
+                    if (nowOpen) {
+                        lastSelectedVal = event.detail.selection.value.name;
+                        currAC.input.value = lastSelectedVal;
+                    }
+                },
+                open: () => nowOpen = true,
+                close: () => nowOpen = false,
             },
         },
-    },
-});
+        selector: () => selectorElem,
+        resultsList: {
+            element: (list, data) => {
+                if (!data.results.length) {
+                    const message = document.createElement("div");
+                    message.setAttribute("class", "no_result");
+                    message.innerHTML = `<span>Found No Results for "${data.query}"</span>`;
+                    list.prepend(message);
+                }
+            },
+            noResults: true,
+        },
+        threshold: 3,
+        searchEngine: "loose",
+        diacritics: true,
+        submit: true,
+    });
+    i++;
+    currAC.lastSelectedVal = () => lastSelectedVal;
+    currAC.nowOpen = () => nowOpen;
+    return currAC;
+};

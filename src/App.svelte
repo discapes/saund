@@ -1,44 +1,34 @@
 <script>
 	import { tick, onMount } from "svelte";
-	import autoComplete from "@tarekraafat/autocomplete.js";
-	let autoCompleteJS;
-	const acConfig = {
-		data: {
-			src: [
-				{ id: 1, name: "one" },
-				{ id: 2, name: "two" },
-				{ id: 3, name: "three" },
-			],
-			cache: true,
-			keys: ["name"],
-		},
-		resultItem: {
-			highlight: true,
-		},
-		events: {
-			input: {
-				selection: (event) => {
-					const selection = event.detail.selection.value.name;
-					autoCompleteJS.input.value = selection;
-				},
-			},
-		},
-		selector: () => slots[currentRow].elem,
-	};
-	onMount(() => {
-		autoCompleteJS = new autoComplete(acConfig);
-	});
+	import { genAC } from "./ac.js";
+	let acJS;
 
 	let slots = Array.from({ length: 6 }, Object);
 	let currentRow = 0;
 
+	onMount(() => (acJS = genAC(slots[currentRow].elem)));
+
+	function submit() {
+		currentRow++;
+		tick().then(() => slots[currentRow].elem.focus());
+		acJS = genAC(slots[currentRow].elem);
+	}
+
 	function kd(e) {
-		// if (e.key === "Enter") {
-		// 	currentRow++;
-		// 	tick().then(() => slots[currentRow].elem.focus());
-		// 	autoCompleteJS.close();
-		// 	autoCompleteJS = new autoComplete(acConfig);
-		// }
+		switch (e.key) {
+			case "Enter":
+				if (slots[currentRow].elem.value == acJS.lastSelectedVal()) {
+					submit();
+				}
+				e.preventDefault();
+				break;
+			case "Tab":
+				try {
+					acJS.select();
+				} catch {}
+				e.preventDefault();
+				break;
+		}
 	}
 </script>
 
@@ -54,7 +44,7 @@
 			placeholder={i == currentRow ? "Start typing..." : ""}
 		/>
 	{/each}
-	<button> Submit </button>
+	<button on:click={submit}> Submit </button>
 </div>
 
 <style>
