@@ -858,11 +858,10 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			iframe = element("iframe");
-    			attr_dev(iframe, "name", "27");
-    			attr_dev(iframe, "id", "soundcloud27");
+    			attr_dev(iframe, "id", "soundcloud");
     			attr_dev(iframe, "allow", "autoplay");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://w.soundcloud.com/player/?url=https://soundcloud.com/linkin_park/numb&cache=27")) attr_dev(iframe, "src", iframe_src_value);
-    			add_location(iframe, file$2, 6, 0, 33);
+    			add_location(iframe, file$2, 3, 0, 23);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
