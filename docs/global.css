@@ -71,6 +71,7 @@ button:focus {
 }
 
 .autoComplete_wrapper>ul {
+    z-index: 100;
     bottom: auto !important;
     top: 100% !important;
     position: absolute;
@@ -82,7 +83,7 @@ button:focus {
     text-align: left;
     list-style: none;
     background: #121213;
-    border: 1px solid orange;
+    border: 1px solid var(--theme);
     transition: 0.15s ease-in-out;
     -moz-transition: 0.15s ease-in-out;
     -webkit-transition: 0.15s ease-in-out;
@@ -107,15 +108,15 @@ button:focus {
 
 .autoComplete_wrapper>ul>li mark {
     background-color: transparent;
-    color: orange;
+    color: var(--theme);
     font-weight: bold;
 }
 
 .autoComplete_wrapper>ul>li:hover {
     cursor: pointer;
-    background-color: rgba(255, 162, 0, 0.15);
+    background-color: rgba(var(--theme-rgb), 0.15);
 }
 
 .autoComplete_wrapper>ul>li[aria-selected="true"] {
-    background-color: rgba(255, 162, 0, 0.15);
+    background-color: rgba(var(--theme-rgb), 0.15);
 }

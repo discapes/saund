@@ -1,20 +1,15 @@
 import autoComplete from "@tarekraafat/autocomplete.js";
 
-let currAC;
-let lastSelectedVal, nowOpen;
-let i = 0;
-
 export const genAC = (selectorElem) => {
-    currAC?.close();
-    lastSelectedVal = undefined;
-    nowOpen = false;
-    currAC = new autoComplete({
+    let ac = new autoComplete({
         data: {
             src: [
                 { id: 1, name: "one" },
                 { id: 2, name: "two" },
                 { id: 3, name: "three" },
                 { id: 4, name: "èèèat" },
+                { id: 5, name: "thrèèè" },
+                { id: 6, name: "song1" },
             ],
             cache: true,
             keys: ["name"],
@@ -25,13 +20,9 @@ export const genAC = (selectorElem) => {
         events: {
             input: {
                 selection: (event) => {
-                    if (nowOpen) {
-                        lastSelectedVal = event.detail.selection.value.name;
-                        currAC.input.value = lastSelectedVal;
-                    }
-                },
-                open: () => nowOpen = true,
-                close: () => nowOpen = false,
+                    ac.lastSelectedVal = event.detail.selection.value.name;
+                    ac.input.value = ac.lastSelectedVal;
+                },  
             },
         },
         selector: () => selectorElem,
@@ -51,8 +42,5 @@ export const genAC = (selectorElem) => {
         diacritics: true,
         submit: true,
     });
-    i++;
-    currAC.lastSelectedVal = () => lastSelectedVal;
-    currAC.nowOpen = () => nowOpen;
-    return currAC;
+    return ac;
 };
