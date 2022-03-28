@@ -1,5 +1,5 @@
 function getSOTD() {
-    return { name: "song1", url: "www.google.com" }
+    return { name: "song1", url: "https://soundcloud.com/linkin_park/numb" }
 }
 export const SOTD = getSOTD();
 // function T() {

@@ -2,7 +2,7 @@
     import { fields } from "./fields";
 </script>
 
-<div class="buttons">
+<div class="buttons m-4">
     <button on:click={$fields.skip} style={$fields.current ? "" : "display:none"}>
         Skip
     </button>

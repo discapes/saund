@@ -1,34 +1,40 @@
 <script>
-    import Fields from './Fields.svelte'
-    import Player from './Player.svelte'
-    import Buttons from './Buttons.svelte'
+	import View from "./View.svelte";
 </script>
 
-<div class="container">
-	<h1>Hello world!</h1>
-    <Fields></Fields>
-    <Player></Player>
-    <Buttons></Buttons>
+<div
+	class="
+	 bg-gradient-to-r from-cyan-500 to-blue-500
+	 flex
+	 justify-center
+	 items-center
+	 h-full"
+>
+	<View />
 </div>
 
-<style>
-	.container {
-		width: 100%;
-		max-width: 400px;
+<style global lang="postcss">
+	@tailwind base;
+	@tailwind components;
+	@tailwind utilities;
+
+	input,
+	input:focus-visible,
+	input:focus {
+		outline-width: 2px;
+		outline-color: white;
 	}
-	:root {
-		--bg-color: #121213;
-		--correct: #538d4e;
-		--grey: #3a3a3c;
-		--theme: cyan;
-		--theme-rgb: 0, 255, 255;
+	body {
+		height: 100vh;
 	}
-    :global(body) {
-		background: var(--bg-color);
-		color: white;
+	* {
+		border-radius: 10px;
+	}
+	html {
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+			Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 		text-align: center;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		color: white;
 	}
 </style>
+

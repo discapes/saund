@@ -29,8 +29,13 @@
 		bind:this={field.elem}
 		bind:value={field.val}
 		disabled={field !== $fields.current}
-		on:keydown={kd}
-		class={field.class}
+		on:keydown={kd} 
+		class="{field.class} 
+		bg-gradient-to-r to-cyan-500 from-blue-500
+		placeholder:text-slate-200
+		border border-white 
+		p-1.5 w-full h-10 my-1 text-xl
+		select-none focus:outline"
 		id="guessfield"
 		placeholder={field === $fields.current ? "Start typing..." : ""}
 	/>
@@ -48,22 +53,5 @@
 		background: var(--grey);
 		color:grey;
 		font-weight: bold;
-	}
-	input {
-		box-sizing: border-box;
-		display: block;
-		margin: 50px;
-		width: 100%;
-		height: 40px;
-		margin: 5px 1px;
-		font-size: 1.5rem;
-		color: white;
-		user-select: none;
-		border: 2px solid var(--grey);
-		background: var(--bg-color);
-		border-radius: 0;
-	}
-	input:focus {
-		outline: 1px solid var(--theme);
 	}
 </style>
