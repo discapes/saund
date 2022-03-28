@@ -30,28 +30,24 @@
 		bind:value={field.val}
 		disabled={field !== $fields.current}
 		on:keydown={kd} 
-		class="{field.class} 
-		bg-gradient-to-r to-cyan-500 from-blue-500
-		placeholder:text-slate-200
-		border border-white 
-		p-1.5 w-full h-10 my-1 text-xl
-		select-none focus:outline"
+		class="{field.class ? field.class : "bg-gradient-to-r to-primary-500 from-secondary-500"} 
+		border border-white focus:outline outline-2 outline-white
+		placeholder:text-neutral-200 select-none
+		p-1.5 w-full h-10 my-1 text-xl"
 		id="guessfield"
 		placeholder={field === $fields.current ? "Start typing..." : ""}
 	/>
 {/each}
 
-<style>
+<style lang="postcss">
 	.correct {
-		background: rgba(var(--theme-rgb), 0.50);	
-		outline: 1px solid var(--theme);
+		@apply outline bg-correct-700/50;
 	}
 	.incorrect {
-		background: var(--grey);
+		@apply bg-incorrect-500/50;
 	}
 	.skipped {
-		background: var(--grey);
-		color:grey;
-		font-weight: bold;
+		@apply font-bold bg-skipped-500/50;
+		color: #f0f0f0f0;
 	}
 </style>

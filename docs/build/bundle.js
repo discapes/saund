@@ -646,7 +646,11 @@ var app = (function () {
     		c: function create() {
     			input = element("input");
     			input.disabled = input_disabled_value = /*field*/ ctx[4] !== /*$fields*/ ctx[0].current;
-    			attr_dev(input, "class", input_class_value = "" + (/*field*/ ctx[4].class + " bg-gradient-to-r to-cyan-500 from-blue-500 placeholder:text-slate-200 border border-white p-1.5 w-full h-10 my-1 text-xl select-none focus:outline" + " svelte-1grblq0"));
+
+    			attr_dev(input, "class", input_class_value = "" + ((/*field*/ ctx[4].class
+    			? /*field*/ ctx[4].class
+    			: "bg-gradient-to-r to-primary-500 from-secondary-500") + " border border-white focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 w-full h-10 my-1 text-xl" + " svelte-1pz73f6"));
+
     			attr_dev(input, "id", "guessfield");
 
     			attr_dev(input, "placeholder", input_placeholder_value = /*field*/ ctx[4] === /*$fields*/ ctx[0].current
@@ -676,7 +680,9 @@ var app = (function () {
     				prop_dev(input, "disabled", input_disabled_value);
     			}
 
-    			if (dirty & /*$fields*/ 1 && input_class_value !== (input_class_value = "" + (/*field*/ ctx[4].class + " bg-gradient-to-r to-cyan-500 from-blue-500 placeholder:text-slate-200 border border-white p-1.5 w-full h-10 my-1 text-xl select-none focus:outline" + " svelte-1grblq0"))) {
+    			if (dirty & /*$fields*/ 1 && input_class_value !== (input_class_value = "" + ((/*field*/ ctx[4].class
+    			? /*field*/ ctx[4].class
+    			: "bg-gradient-to-r to-primary-500 from-secondary-500") + " border border-white focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 w-full h-10 my-1 text-xl" + " svelte-1pz73f6"))) {
     				attr_dev(input, "class", input_class_value);
     			}
 
@@ -859,8 +865,11 @@ var app = (function () {
     const file$3 = "src\\Player.svelte";
 
     function create_fragment$3(ctx) {
+    	let div;
+    	let div_class_value;
+    	let t0;
     	let button;
-    	let t;
+    	let t1;
     	let iframe;
     	let iframe_src_value;
     	let mounted;
@@ -868,41 +877,58 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
+    			div = element("div");
+    			t0 = space();
     			button = element("button");
-    			t = space();
+    			t1 = space();
     			iframe = element("iframe");
-    			attr_dev(button, "class", "playbtn svelte-q3bsle");
-    			toggle_class(button, "unpaused", /*unpaused*/ ctx[0]);
-    			add_location(button, file$3, 21, 0, 472);
+    			set_style(div, "width", /*currentPosition*/ ctx[0] / 100 + "%");
+    			attr_dev(div, "class", div_class_value = "h-5 mt-5 " + (/*playing*/ ctx[1] ? "bg-white" : "bg-neutral-100"));
+    			add_location(div, file$3, 25, 0, 566);
+    			attr_dev(button, "class", "animation m-4 cursor-pointer border-transparent border-l-neutral-100 hover:border-l-white svelte-8pxbw6");
+    			toggle_class(button, "playing", /*playing*/ ctx[1]);
+    			add_location(button, file$3, 27, 0, 670);
     			attr_dev(iframe, "id", "soundcloud");
     			attr_dev(iframe, "allow", "autoplay");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://w.soundcloud.com/player/?url=" + SOTD.url)) attr_dev(iframe, "src", iframe_src_value);
     			set_style(iframe, "display", "none");
-    			add_location(iframe, file$3, 23, 0, 533);
+    			add_location(iframe, file$3, 33, 0, 828);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			insert_dev(target, t0, anchor);
     			insert_dev(target, button, anchor);
-    			insert_dev(target, t, anchor);
+    			insert_dev(target, t1, anchor);
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*play*/ ctx[1], false, false, false);
+    				dispose = listen_dev(button, "click", /*play*/ ctx[2], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*unpaused*/ 1) {
-    				toggle_class(button, "unpaused", /*unpaused*/ ctx[0]);
+    			if (dirty & /*currentPosition*/ 1) {
+    				set_style(div, "width", /*currentPosition*/ ctx[0] / 100 + "%");
+    			}
+
+    			if (dirty & /*playing*/ 2 && div_class_value !== (div_class_value = "h-5 mt-5 " + (/*playing*/ ctx[1] ? "bg-white" : "bg-neutral-100"))) {
+    				attr_dev(div, "class", div_class_value);
+    			}
+
+    			if (dirty & /*playing*/ 2) {
+    				toggle_class(button, "playing", /*playing*/ ctx[1]);
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(t0);
     			if (detaching) detach_dev(button);
-    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(iframe);
     			mounted = false;
     			dispose();
@@ -928,13 +954,19 @@ var app = (function () {
 
     	tick().then(() => {
     		wid = SC.Widget("soundcloud");
-    		wid.bind(SC.Widget.Events.PLAY_PROGRESS, e => currentPosition = e.currentPosition);
+    		wid.bind(SC.Widget.Events.PLAY_PROGRESS, e => $$invalidate(0, currentPosition = e.currentPosition));
     	});
 
-    	let unpaused = false;
+    	let playing = false;
 
     	function play() {
-    		$$invalidate(0, unpaused = !unpaused);
+    		$$invalidate(1, playing = !playing);
+
+    		if (playing) {
+    			wid.seekTo(0);
+    			$$invalidate(0, currentPosition = 0);
+    		}
+
     		wid.toggle();
     	}
 
@@ -949,21 +981,21 @@ var app = (function () {
     		tick,
     		wid,
     		currentPosition,
-    		unpaused,
+    		playing,
     		play
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('wid' in $$props) wid = $$props.wid;
-    		if ('currentPosition' in $$props) currentPosition = $$props.currentPosition;
-    		if ('unpaused' in $$props) $$invalidate(0, unpaused = $$props.unpaused);
+    		if ('currentPosition' in $$props) $$invalidate(0, currentPosition = $$props.currentPosition);
+    		if ('playing' in $$props) $$invalidate(1, playing = $$props.playing);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [unpaused, play];
+    	return [currentPosition, playing, play];
     }
 
     class Player extends SvelteComponentDev {
@@ -983,45 +1015,45 @@ var app = (function () {
     /* src\Buttons.svelte generated by Svelte v3.46.4 */
     const file$2 = "src\\Buttons.svelte";
 
-    function create_fragment$2(ctx) {
-    	let div;
+    // (5:0) {#if $fields.current}
+    function create_if_block(ctx) {
+    	let div2;
+    	let div0;
     	let button0;
-    	let t0;
-    	let button0_style_value;
     	let t1;
+    	let div1;
     	let button1;
-    	let t2;
-    	let button1_style_value;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			div = element("div");
+    			div2 = element("div");
+    			div0 = element("div");
     			button0 = element("button");
-    			t0 = text("Skip");
+    			button0.textContent = "Skip";
     			t1 = space();
+    			div1 = element("div");
     			button1 = element("button");
-    			t2 = text("Submit");
-    			attr_dev(button0, "style", button0_style_value = /*$fields*/ ctx[0].current ? "" : "display:none");
-    			attr_dev(button0, "class", "svelte-15wn4d0");
-    			add_location(button0, file$2, 5, 4, 94);
-    			attr_dev(button1, "style", button1_style_value = /*$fields*/ ctx[0].current ? "" : "display:none");
-    			attr_dev(button1, "class", "svelte-15wn4d0");
-    			add_location(button1, file$2, 8, 4, 207);
-    			attr_dev(div, "class", "buttons m-4 svelte-15wn4d0");
-    			add_location(div, file$2, 4, 0, 63);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    			button1.textContent = "Submit";
+    			attr_dev(button0, "class", "cursor-pointer border w-full h-full text-xl p-5 bg-neutral-500/50 hover:bg-neutral-500/70");
+    			add_location(button0, file$2, 7, 8, 148);
+    			attr_dev(div0, "class", "grow mr-2");
+    			add_location(div0, file$2, 6, 4, 115);
+    			attr_dev(button1, "class", "cursor-pointer border w-full h-full text-xl p-5 bg-submit-700/50 hover:bg-submit-700/70");
+    			add_location(button1, file$2, 13, 8, 371);
+    			attr_dev(div1, "class", "grow ml-2");
+    			add_location(div1, file$2, 12, 4, 338);
+    			attr_dev(div2, "class", "flex my-8");
+    			add_location(div2, file$2, 5, 0, 86);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, button0);
-    			append_dev(button0, t0);
-    			append_dev(div, t1);
-    			append_dev(div, button1);
-    			append_dev(button1, t2);
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, div0);
+    			append_dev(div0, button0);
+    			append_dev(div2, t1);
+    			append_dev(div2, div1);
+    			append_dev(div1, button1);
 
     			if (!mounted) {
     				dispose = [
@@ -1050,23 +1082,62 @@ var app = (function () {
     				mounted = true;
     			}
     		},
-    		p: function update(new_ctx, [dirty]) {
+    		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div2);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
 
-    			if (dirty & /*$fields*/ 1 && button0_style_value !== (button0_style_value = /*$fields*/ ctx[0].current ? "" : "display:none")) {
-    				attr_dev(button0, "style", button0_style_value);
-    			}
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(5:0) {#if $fields.current}",
+    		ctx
+    	});
 
-    			if (dirty & /*$fields*/ 1 && button1_style_value !== (button1_style_value = /*$fields*/ ctx[0].current ? "" : "display:none")) {
-    				attr_dev(button1, "style", button1_style_value);
+    	return block;
+    }
+
+    function create_fragment$2(ctx) {
+    	let if_block_anchor;
+    	let if_block = /*$fields*/ ctx[0].current && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (/*$fields*/ ctx[0].current) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			mounted = false;
-    			run_all(dispose);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
 
@@ -1120,52 +1191,27 @@ var app = (function () {
     	let t1;
     	let fields;
     	let t2;
-    	let br0;
-    	let br1;
-    	let br2;
-    	let br3;
-    	let br4;
-    	let t3;
     	let player;
-    	let t4;
-    	let br5;
-    	let br6;
-    	let t5;
+    	let t3;
     	let buttons;
     	let current;
     	fields = new Fields({ $$inline: true });
     	player = new Player({ $$inline: true });
-    	buttons = new Buttons({ props: { class: "m-8" }, $$inline: true });
+    	buttons = new Buttons({ $$inline: true });
 
     	const block = {
     		c: function create() {
     			div = element("div");
     			h1 = element("h1");
-    			h1.textContent = "Hello world!";
+    			h1.textContent = "Hello hearld";
     			t1 = space();
     			create_component(fields.$$.fragment);
     			t2 = space();
-    			br0 = element("br");
-    			br1 = element("br");
-    			br2 = element("br");
-    			br3 = element("br");
-    			br4 = element("br");
-    			t3 = space();
     			create_component(player.$$.fragment);
-    			t4 = space();
-    			br5 = element("br");
-    			br6 = element("br");
-    			t5 = space();
+    			t3 = space();
     			create_component(buttons.$$.fragment);
     			attr_dev(h1, "class", "text-5xl font-bold m-4");
     			add_location(h1, file$1, 7, 4, 190);
-    			add_location(br0, file$1, 9, 4, 264);
-    			add_location(br1, file$1, 9, 10, 270);
-    			add_location(br2, file$1, 9, 16, 276);
-    			add_location(br3, file$1, 9, 22, 282);
-    			add_location(br4, file$1, 9, 28, 288);
-    			add_location(br5, file$1, 11, 4, 316);
-    			add_location(br6, file$1, 11, 10, 322);
     			attr_dev(div, "class", "w-full max-w-xl ");
     			add_location(div, file$1, 6, 0, 154);
     		},
@@ -1178,17 +1224,8 @@ var app = (function () {
     			append_dev(div, t1);
     			mount_component(fields, div, null);
     			append_dev(div, t2);
-    			append_dev(div, br0);
-    			append_dev(div, br1);
-    			append_dev(div, br2);
-    			append_dev(div, br3);
-    			append_dev(div, br4);
-    			append_dev(div, t3);
     			mount_component(player, div, null);
-    			append_dev(div, t4);
-    			append_dev(div, br5);
-    			append_dev(div, br6);
-    			append_dev(div, t5);
+    			append_dev(div, t3);
     			mount_component(buttons, div, null);
     			current = true;
     		},
@@ -1265,7 +1302,7 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(view.$$.fragment);
-    			attr_dev(div, "class", "bg-gradient-to-r from-cyan-500 to-blue-500 flex justify-center items-center h-full");
+    			attr_dev(div, "class", "bg-gradient-to-r from-primary-500 to-secondary-500 flex justify-center items-center h-full rounded-none");
     			add_location(div, file, 4, 0, 59);
     		},
     		l: function claim(nodes) {

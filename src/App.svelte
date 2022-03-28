@@ -4,11 +4,12 @@
 
 <div
 	class="
-	 bg-gradient-to-r from-cyan-500 to-blue-500
+	 bg-gradient-to-r from-primary-500 to-secondary-500
 	 flex
 	 justify-center
 	 items-center
-	 h-full"
+	 h-full
+	 rounded-none"
 >
 	<View />
 </div>
@@ -18,12 +19,6 @@
 	@tailwind components;
 	@tailwind utilities;
 
-	input,
-	input:focus-visible,
-	input:focus {
-		outline-width: 2px;
-		outline-color: white;
-	}
 	body {
 		height: 100vh;
 	}

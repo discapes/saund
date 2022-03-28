@@ -12,14 +12,24 @@
         );
     });
 
-    let unpaused = false;
+    let playing = false;
     function play() {
-        unpaused = !unpaused;
+        playing = !playing;
+        if (playing) {
+            wid.seekTo(0);
+            currentPosition = 0;
+        }
         wid.toggle();
     }
 </script>
 
-<button class="playbtn" class:unpaused on:click={play} />
+<div style="width:{currentPosition/100}%;" class="h-5 mt-5 {playing?"bg-white":"bg-neutral-100"}" />
+
+<button
+    class="animation m-4 cursor-pointer border-transparent border-l-neutral-100 hover:border-l-white"
+    class:playing
+    on:click={play}
+/>
 
 <iframe
     id="soundcloud"
@@ -29,28 +39,17 @@
 />
 
 <style lang="scss">
-    .playbtn {
-        border: 0;
-        background: transparent;
-        box-sizing: border-box;
-        width: 0;
+    .animation {
+        transition: 100ms all ease;
         height: 74px;
 
-        border-color: transparent transparent transparent whitesmoke;
-        transition: 100ms all ease;
-        cursor: pointer;
-
-        // play state
+        border-radius: 0px;
         border-style: solid;
         border-width: 37px 0 37px 60px;
 
-        &.unpaused {
+        &.playing {
             border-style: double;
             border-width: 0px 0 0px 60px;
-        }
-
-        &:hover {
-            border-color: transparent transparent transparent white;
         }
     }
 </style>

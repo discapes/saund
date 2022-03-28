@@ -5,10 +5,8 @@
 </script>
 
 <div class="w-full max-w-xl ">
-    <h1 class="text-5xl font-bold m-4">Hello world!</h1>
+    <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Fields />
-    <br /><br /><br /><br /><br />
     <Player />
-    <br /><br />
-    <Buttons class="m-8"/>
+    <Buttons/>
 </div>
