@@ -101,6 +101,59 @@ var app = (function () {
             node.style.setProperty(key, value, important ? 'important' : '');
         }
     }
+    // unfortunately this can't be a constant as that wouldn't be tree-shakeable
+    // so we cache the result instead
+    let crossorigin;
+    function is_crossorigin() {
+        if (crossorigin === undefined) {
+            crossorigin = false;
+            try {
+                if (typeof window !== 'undefined' && window.parent) {
+                    void window.parent.document;
+                }
+            }
+            catch (error) {
+                crossorigin = true;
+            }
+        }
+        return crossorigin;
+    }
+    function add_resize_listener(node, fn) {
+        const computed_style = getComputedStyle(node);
+        if (computed_style.position === 'static') {
+            node.style.position = 'relative';
+        }
+        const iframe = element('iframe');
+        iframe.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; ' +
+            'overflow: hidden; border: 0; opacity: 0; pointer-events: none; z-index: -1;');
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.tabIndex = -1;
+        const crossorigin = is_crossorigin();
+        let unsubscribe;
+        if (crossorigin) {
+            iframe.src = "data:text/html,<script>onresize=function(){parent.postMessage(0,'*')}</script>";
+            unsubscribe = listen(window, 'message', (event) => {
+                if (event.source === iframe.contentWindow)
+                    fn();
+            });
+        }
+        else {
+            iframe.src = 'about:blank';
+            iframe.onload = () => {
+                unsubscribe = listen(iframe.contentWindow, 'resize', fn);
+            };
+        }
+        append(node, iframe);
+        return () => {
+            if (crossorigin) {
+                unsubscribe();
+            }
+            else if (unsubscribe && iframe.contentWindow) {
+                unsubscribe();
+            }
+            detach(iframe);
+        };
+    }
     function toggle_class(element, name, toggle) {
         element.classList[toggle ? 'add' : 'remove'](name);
     }
@@ -400,6 +453,13 @@ var app = (function () {
         node[property] = value;
         dispatch_dev('SvelteDOMSetProperty', { node, property, value });
     }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.wholeText === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
+    }
     function validate_each_argument(arg) {
         if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
             let msg = '{#each} only iterates over array-like objects.';
@@ -490,48 +550,6 @@ var app = (function () {
         return ac;
     };
 
-    function getSOTD() {
-        return { name: "song1", url: "https://soundcloud.com/linkin_park/numb" }
-    }
-    const SOTD = getSOTD();
-    // function T() {
-    //     let scWid = SC.Widget("soundcloud" + h.id);
-    //     scWid.bind(SC.Widget.Events.READY, function () {
-    //         y.getCurrentSound(function (e) {
-    //             "BLOCK" === e.policy && n(9, (g = !0)), c("updateSong", { currentSong: e });
-    //         }),
-    //             y.bind(SC.Widget.Events.PAUSE, function () {
-    //                 $(!1);
-    //             }),
-    //             y.bind(SC.Widget.Events.PLAY, function () {
-    //                 b || (pe("startGame", { name: "startGame" }), pe("startGame#" + h.id, { name: "startGame" }), (b = !0)), $(!0), n(12, (x = !0));
-    //             }),
-    //             y.bind(SC.Widget.Events.PLAY_PROGRESS, function (e) {
-    //                 n(11, (w = e.currentPosition)),
-    //                     1 == s ? (p.isPrime ? (n(10, (v = (w / u) * 100)), w > u && M()) : (n(10, (v = (w / (d * f.attemptInterval)) * 100)), w > d * f.attemptInterval && M())) : (n(10, (v = (w / m) * 100)), w > m && M());
-    //             });
-    //     });
-    // }
-
-    // P(() => {
-    //     const e = document.createElement("iframe");
-    //     (e.name = h.id),
-    //         (e.id = "soundcloud" + h.id),
-    //         (e.allow = "autoplay"),
-    //         (e.height = 0),
-    //         (e.src = "https://w.soundcloud.com/player/?url=" + h.url + "&cache=" + h.id),
-    //         D.appendChild(e),
-    //         (_ = !0),
-    //         k &&
-    //             (setTimeout(() => {
-    //                 n(13, (S = !0));
-    //             }, 6e3),
-    //             T());
-    // });
-
-    // y.toggle()
-    // y.seekTo(0), y.play();
-
     const subscriber_queue = [];
     /**
      * Create a `Writable` store that allows both updating and reading by subscription.
@@ -580,6 +598,78 @@ var app = (function () {
         return { set, update, subscribe };
     }
 
+    function getSOTD() {
+        return { name: "song1", url: "https://soundcloud.com/linkin_park/numb" }
+    }
+    const SOTD = getSOTD();
+
+    function getStoreVal(store) {
+        let val;
+        store.subscribe(value => val = value)();
+        return val;
+    }
+
+    const info = {
+        maxPos: writable(1*1000),
+        cPos: writable(0),
+        playing: writable(false),
+        nextMax() {
+            switch (getStoreVal(this.maxPos)) {
+                case 1000: 
+                    return 2000;
+                case 2000:
+                    return 4000;
+                case 4000:
+                    return 7000;
+                case 7000:
+                    return 11000;
+                case 11000:
+                    return 16000;
+                default:
+                    return 16000;
+            }
+        }
+    };
+
+
+    // function T() {
+    //     let scWid = SC.Widget("soundcloud" + h.id);
+    //     scWid.bind(SC.Widget.Events.READY, function () {
+    //         y.getCurrentSound(function (e) {
+    //             "BLOCK" === e.policy && n(9, (g = !0)), c("updateSong", { currentSong: e });
+    //         }),
+    //             y.bind(SC.Widget.Events.PAUSE, function () {
+    //                 $(!1);
+    //             }),
+    //             y.bind(SC.Widget.Events.PLAY, function () {
+    //                 b || (pe("startGame", { name: "startGame" }), pe("startGame#" + h.id, { name: "startGame" }), (b = !0)), $(!0), n(12, (x = !0));
+    //             }),
+    //             y.bind(SC.Widget.Events.PLAY_PROGRESS, function (e) {
+    //                 n(11, (w = e.currentPosition)),
+    //                     1 == s ? (p.isPrime ? (n(10, (v = (w / u) * 100)), w > u && M()) : (n(10, (v = (w / (d * f.attemptInterval)) * 100)), w > d * f.attemptInterval && M())) : (n(10, (v = (w / m) * 100)), w > m && M());
+    //             });
+    //     });
+    // }
+
+    // P(() => {
+    //     const e = document.createElement("iframe");
+    //     (e.name = h.id),
+    //         (e.id = "soundcloud" + h.id),
+    //         (e.allow = "autoplay"),
+    //         (e.height = 0),
+    //         (e.src = "https://w.soundcloud.com/player/?url=" + h.url + "&cache=" + h.id),
+    //         D.appendChild(e),
+    //         (_ = !0),
+    //         k &&
+    //             (setTimeout(() => {
+    //                 n(13, (S = !0));
+    //             }, 6e3),
+    //             T());
+    // });
+
+    // y.toggle()
+    // y.seekTo(0), y.play();
+
     const fields = writable(makeFields());
 
     function makeFields() {
@@ -587,13 +677,16 @@ var app = (function () {
         fieldsObj.i = 0;
         fieldsObj.current = fieldsObj[fieldsObj.i];
 
-        fieldsObj.next = () => fieldsObj.current = fieldsObj[++fieldsObj.i];
+        fieldsObj.next = () => {
+            fieldsObj.current = fieldsObj[++fieldsObj.i];
+            info.maxPos.set(info.nextMax());
+        };
         fieldsObj.disable = () => fieldsObj.current = null;
         fieldsObj.skip = () => {
             fieldsObj.current.class = "skipped";
             fieldsObj.current.val = "SKIPPED";
             fieldsObj.next();
-            tick().then(() => fieldsObj.current.elem.focus());
+            tick().then(() => fieldsObj.current?.elem?.focus());
             fields.update((o) => o);
         };
 
@@ -627,12 +720,14 @@ var app = (function () {
 
     // (27:0) {#each $fields as field}
     function create_each_block(ctx) {
+    	let div;
     	let input;
     	let input_disabled_value;
     	let input_class_value;
     	let input_placeholder_value;
     	let each_value = /*each_value*/ ctx[5];
     	let field_index = /*field_index*/ ctx[6];
+    	let t;
     	let mounted;
     	let dispose;
     	const assign_input = () => /*input_binding*/ ctx[2](input, each_value, field_index);
@@ -644,12 +739,14 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			input = element("input");
+    			t = space();
     			input.disabled = input_disabled_value = /*field*/ ctx[4] !== /*$fields*/ ctx[0].current;
 
     			attr_dev(input, "class", input_class_value = "" + ((/*field*/ ctx[4].class
     			? /*field*/ ctx[4].class
-    			: "bg-gradient-to-r to-primary-500 from-secondary-500") + " border border-white focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 w-full h-10 my-1 text-xl" + " svelte-1pz73f6"));
+    			: "bg-transparent") + " border focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 text-xl w-full" + " svelte-1pz73f6"));
 
     			attr_dev(input, "id", "guessfield");
 
@@ -657,12 +754,16 @@ var app = (function () {
     			? "Start typing..."
     			: "");
 
-    			add_location(input, file$4, 27, 1, 496);
+    			add_location(input, file$4, 28, 1, 587);
+    			attr_dev(div, "class", "bg-gradient-to-r from-primary2-500/30 to-secondary2-500/30 w-full h-10 my-2");
+    			add_location(div, file$4, 27, 0, 495);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, input, anchor);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, input);
     			assign_input();
     			set_input_value(input, /*field*/ ctx[4].val);
+    			append_dev(div, t);
 
     			if (!mounted) {
     				dispose = [
@@ -682,7 +783,7 @@ var app = (function () {
 
     			if (dirty & /*$fields*/ 1 && input_class_value !== (input_class_value = "" + ((/*field*/ ctx[4].class
     			? /*field*/ ctx[4].class
-    			: "bg-gradient-to-r to-primary-500 from-secondary-500") + " border border-white focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 w-full h-10 my-1 text-xl" + " svelte-1pz73f6"))) {
+    			: "bg-transparent") + " border focus:outline outline-2 outline-white placeholder:text-neutral-200 select-none p-1.5 text-xl w-full" + " svelte-1pz73f6"))) {
     				attr_dev(input, "class", input_class_value);
     			}
 
@@ -704,7 +805,7 @@ var app = (function () {
     			}
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(input);
+    			if (detaching) detach_dev(div);
     			unassign_input();
     			mounted = false;
     			run_all(dispose);
@@ -865,11 +966,25 @@ var app = (function () {
     const file$3 = "src\\Player.svelte";
 
     function create_fragment$3(ctx) {
-    	let div;
-    	let div_class_value;
+    	let div7;
+    	let div1;
+    	let div0;
+    	let div0_class_value;
     	let t0;
-    	let button;
+    	let div2;
     	let t1;
+    	let div3;
+    	let t2;
+    	let div4;
+    	let t3;
+    	let div5;
+    	let t4;
+    	let div6;
+    	let div7_resize_listener;
+    	let t5;
+    	let button;
+    	let button_disabled_value;
+    	let t6;
     	let iframe;
     	let iframe_src_value;
     	let mounted;
@@ -877,58 +992,120 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			div = element("div");
+    			div7 = element("div");
+    			div1 = element("div");
+    			div0 = element("div");
     			t0 = space();
-    			button = element("button");
+    			div2 = element("div");
     			t1 = space();
+    			div3 = element("div");
+    			t2 = space();
+    			div4 = element("div");
+    			t3 = space();
+    			div5 = element("div");
+    			t4 = space();
+    			div6 = element("div");
+    			t5 = space();
+    			button = element("button");
+    			t6 = space();
     			iframe = element("iframe");
-    			set_style(div, "width", /*currentPosition*/ ctx[0] / 100 + "%");
-    			attr_dev(div, "class", div_class_value = "h-5 mt-5 " + (/*playing*/ ctx[1] ? "bg-white" : "bg-neutral-100"));
-    			add_location(div, file$3, 25, 0, 566);
+    			set_style(div0, "width", /*$cPos*/ ctx[4] / /*$maxPos*/ ctx[3] * 100 + "%");
+    			set_style(div0, "background-size", /*barWidth*/ ctx[0] + "px 100%");
+
+    			attr_dev(div0, "class", div0_class_value = "h-full " + (/*$playing*/ ctx[2]
+    			? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
+    			: 'bg-gradient-to-r from-correct-500/70 via-incorrect-500/70 to-incorrect-500/70'));
+
+    			add_location(div0, file$3, 38, 8, 1052);
+    			attr_dev(div1, "class", "h-full absolute bg-white/30 overflow-hidden");
+    			set_style(div1, "width", /*$maxPos*/ ctx[3] / (16 * 1000) * 100 + "%");
+    			add_location(div1, file$3, 34, 4, 922);
+    			attr_dev(div2, "class", "w-px h-full absolute bg-white left-1/16");
+    			add_location(div2, file$3, 45, 4, 1405);
+    			attr_dev(div3, "class", "w-px h-full absolute bg-white left-2/16");
+    			add_location(div3, file$3, 46, 4, 1466);
+    			attr_dev(div4, "class", "w-px h-full absolute bg-white left-4/16");
+    			add_location(div4, file$3, 47, 4, 1527);
+    			attr_dev(div5, "class", "w-px h-full absolute bg-white left-7/16");
+    			add_location(div5, file$3, 48, 4, 1588);
+    			attr_dev(div6, "class", "w-px h-full absolute bg-white left-11/16");
+    			add_location(div6, file$3, 49, 4, 1649);
+    			attr_dev(div7, "class", "border border-2 mt-3 h-5 relative");
+    			add_render_callback(() => /*div7_elementresize_handler*/ ctx[9].call(div7));
+    			add_location(div7, file$3, 33, 0, 841);
     			attr_dev(button, "class", "animation m-4 cursor-pointer border-transparent border-l-neutral-100 hover:border-l-white svelte-8pxbw6");
-    			toggle_class(button, "playing", /*playing*/ ctx[1]);
-    			add_location(button, file$3, 27, 0, 670);
+    			button.disabled = button_disabled_value = !/*ready*/ ctx[1];
+    			toggle_class(button, "playing", /*$playing*/ ctx[2]);
+    			add_location(button, file$3, 52, 0, 1717);
     			attr_dev(iframe, "id", "soundcloud");
     			attr_dev(iframe, "allow", "autoplay");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://w.soundcloud.com/player/?url=" + SOTD.url)) attr_dev(iframe, "src", iframe_src_value);
     			set_style(iframe, "display", "none");
-    			add_location(iframe, file$3, 33, 0, 828);
+    			add_location(iframe, file$3, 59, 0, 1909);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t0, anchor);
+    			insert_dev(target, div7, anchor);
+    			append_dev(div7, div1);
+    			append_dev(div1, div0);
+    			append_dev(div7, t0);
+    			append_dev(div7, div2);
+    			append_dev(div7, t1);
+    			append_dev(div7, div3);
+    			append_dev(div7, t2);
+    			append_dev(div7, div4);
+    			append_dev(div7, t3);
+    			append_dev(div7, div5);
+    			append_dev(div7, t4);
+    			append_dev(div7, div6);
+    			div7_resize_listener = add_resize_listener(div7, /*div7_elementresize_handler*/ ctx[9].bind(div7));
+    			insert_dev(target, t5, anchor);
     			insert_dev(target, button, anchor);
-    			insert_dev(target, t1, anchor);
+    			insert_dev(target, t6, anchor);
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*play*/ ctx[2], false, false, false);
+    				dispose = listen_dev(button, "click", /*play*/ ctx[8], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*currentPosition*/ 1) {
-    				set_style(div, "width", /*currentPosition*/ ctx[0] / 100 + "%");
+    			if (dirty & /*$cPos, $maxPos*/ 24) {
+    				set_style(div0, "width", /*$cPos*/ ctx[4] / /*$maxPos*/ ctx[3] * 100 + "%");
     			}
 
-    			if (dirty & /*playing*/ 2 && div_class_value !== (div_class_value = "h-5 mt-5 " + (/*playing*/ ctx[1] ? "bg-white" : "bg-neutral-100"))) {
-    				attr_dev(div, "class", div_class_value);
+    			if (dirty & /*barWidth*/ 1) {
+    				set_style(div0, "background-size", /*barWidth*/ ctx[0] + "px 100%");
     			}
 
-    			if (dirty & /*playing*/ 2) {
-    				toggle_class(button, "playing", /*playing*/ ctx[1]);
+    			if (dirty & /*$playing*/ 4 && div0_class_value !== (div0_class_value = "h-full " + (/*$playing*/ ctx[2]
+    			? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
+    			: 'bg-gradient-to-r from-correct-500/70 via-incorrect-500/70 to-incorrect-500/70'))) {
+    				attr_dev(div0, "class", div0_class_value);
+    			}
+
+    			if (dirty & /*$maxPos*/ 8) {
+    				set_style(div1, "width", /*$maxPos*/ ctx[3] / (16 * 1000) * 100 + "%");
+    			}
+
+    			if (dirty & /*ready*/ 2 && button_disabled_value !== (button_disabled_value = !/*ready*/ ctx[1])) {
+    				prop_dev(button, "disabled", button_disabled_value);
+    			}
+
+    			if (dirty & /*$playing*/ 4) {
+    				toggle_class(button, "playing", /*$playing*/ ctx[2]);
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(div7);
+    			div7_resize_listener();
+    			if (detaching) detach_dev(t5);
     			if (detaching) detach_dev(button);
-    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(t6);
     			if (detaching) detach_dev(iframe);
     			mounted = false;
     			dispose();
@@ -947,27 +1124,47 @@ var app = (function () {
     }
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $playing;
+    	let $maxPos;
+    	let $cPos;
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Player', slots, []);
+    	let barWidth;
     	let wid;
-    	let currentPosition = 0; // ms
+    	let ready = false;
+    	const { cPos, playing, maxPos } = info;
+    	validate_store(cPos, 'cPos');
+    	component_subscribe($$self, cPos, value => $$invalidate(4, $cPos = value));
+    	validate_store(playing, 'playing');
+    	component_subscribe($$self, playing, value => $$invalidate(2, $playing = value));
+    	validate_store(maxPos, 'maxPos');
+    	component_subscribe($$self, maxPos, value => $$invalidate(3, $maxPos = value));
 
     	tick().then(() => {
     		wid = SC.Widget("soundcloud");
-    		wid.bind(SC.Widget.Events.PLAY_PROGRESS, e => $$invalidate(0, currentPosition = e.currentPosition));
+
+    		wid.bind(SC.Widget.Events.PLAY_PROGRESS, e => {
+    			if (e.currentPosition >= $maxPos) {
+    				wid.pause();
+    				playing.set(false);
+    			} else {
+    				cPos.set(e.currentPosition);
+    			}
+    		});
+
+    		wid.bind(SC.Widget.Events.READY, () => $$invalidate(1, ready = true));
     	});
 
-    	let playing = false;
-
     	function play() {
-    		$$invalidate(1, playing = !playing);
+    		playing.set(!$playing);
 
-    		if (playing) {
+    		if ($playing) {
     			wid.seekTo(0);
-    			$$invalidate(0, currentPosition = 0);
+    			cPos.set(0);
+    			wid.play();
+    		} else {
+    			wid.pause();
     		}
-
-    		wid.toggle();
     	}
 
     	const writable_props = [];
@@ -976,26 +1173,49 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Player> was created with unknown prop '${key}'`);
     	});
 
+    	function div7_elementresize_handler() {
+    		barWidth = this.clientWidth;
+    		$$invalidate(0, barWidth);
+    	}
+
     	$$self.$capture_state = () => ({
     		SOTD,
+    		info,
     		tick,
+    		barWidth,
     		wid,
-    		currentPosition,
+    		ready,
+    		cPos,
     		playing,
-    		play
+    		maxPos,
+    		play,
+    		$playing,
+    		$maxPos,
+    		$cPos
     	});
 
     	$$self.$inject_state = $$props => {
+    		if ('barWidth' in $$props) $$invalidate(0, barWidth = $$props.barWidth);
     		if ('wid' in $$props) wid = $$props.wid;
-    		if ('currentPosition' in $$props) $$invalidate(0, currentPosition = $$props.currentPosition);
-    		if ('playing' in $$props) $$invalidate(1, playing = $$props.playing);
+    		if ('ready' in $$props) $$invalidate(1, ready = $$props.ready);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [currentPosition, playing, play];
+    	return [
+    		barWidth,
+    		ready,
+    		$playing,
+    		$maxPos,
+    		$cPos,
+    		cPos,
+    		playing,
+    		maxPos,
+    		play,
+    		div7_elementresize_handler
+    	];
     }
 
     class Player extends SvelteComponentDev {
@@ -1015,45 +1235,41 @@ var app = (function () {
     /* src\Buttons.svelte generated by Svelte v3.46.4 */
     const file$2 = "src\\Buttons.svelte";
 
-    // (5:0) {#if $fields.current}
+    // (9:0) {#if $fields.current}
     function create_if_block(ctx) {
-    	let div2;
-    	let div0;
+    	let div;
     	let button0;
+    	let t0;
+    	let t1_value = (/*moreSecs*/ ctx[0] ? ` (+${/*moreSecs*/ ctx[0]}s)` : "") + "";
     	let t1;
-    	let div1;
+    	let t2;
     	let button1;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			div2 = element("div");
-    			div0 = element("div");
+    			div = element("div");
     			button0 = element("button");
-    			button0.textContent = "Skip";
-    			t1 = space();
-    			div1 = element("div");
+    			t0 = text("Skip");
+    			t1 = text(t1_value);
+    			t2 = space();
     			button1 = element("button");
     			button1.textContent = "Submit";
-    			attr_dev(button0, "class", "cursor-pointer border w-full h-full text-xl p-5 bg-neutral-500/50 hover:bg-neutral-500/70");
-    			add_location(button0, file$2, 7, 8, 148);
-    			attr_dev(div0, "class", "grow mr-2");
-    			add_location(div0, file$2, 6, 4, 115);
-    			attr_dev(button1, "class", "cursor-pointer border w-full h-full text-xl p-5 bg-submit-700/50 hover:bg-submit-700/70");
-    			add_location(button1, file$2, 13, 8, 371);
-    			attr_dev(div1, "class", "grow ml-2");
-    			add_location(div1, file$2, 12, 4, 338);
-    			attr_dev(div2, "class", "flex my-4");
-    			add_location(div2, file$2, 5, 0, 86);
+    			attr_dev(button0, "class", "mr-2 cursor-pointer border w-full h-full text-xl p-5 bg-neutral-500/50 hover:bg-neutral-500/70");
+    			add_location(button0, file$2, 10, 8, 268);
+    			attr_dev(button1, "class", "ml-2 cursor-pointer border w-full h-full text-xl p-5 bg-submit-700/50 hover:bg-submit-700/70");
+    			add_location(button1, file$2, 18, 8, 533);
+    			attr_dev(div, "class", "flex my-4");
+    			add_location(div, file$2, 9, 4, 235);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
-    			append_dev(div0, button0);
-    			append_dev(div2, t1);
-    			append_dev(div2, div1);
-    			append_dev(div1, button1);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, button0);
+    			append_dev(button0, t0);
+    			append_dev(button0, t1);
+    			append_dev(div, t2);
+    			append_dev(div, button1);
 
     			if (!mounted) {
     				dispose = [
@@ -1061,7 +1277,7 @@ var app = (function () {
     						button0,
     						"click",
     						function () {
-    							if (is_function(/*$fields*/ ctx[0].skip)) /*$fields*/ ctx[0].skip.apply(this, arguments);
+    							if (is_function(/*$fields*/ ctx[1].skip)) /*$fields*/ ctx[1].skip.apply(this, arguments);
     						},
     						false,
     						false,
@@ -1071,7 +1287,7 @@ var app = (function () {
     						button1,
     						"click",
     						function () {
-    							if (is_function(/*$fields*/ ctx[0].submit)) /*$fields*/ ctx[0].submit.apply(this, arguments);
+    							if (is_function(/*$fields*/ ctx[1].submit)) /*$fields*/ ctx[1].submit.apply(this, arguments);
     						},
     						false,
     						false,
@@ -1084,9 +1300,10 @@ var app = (function () {
     		},
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
+    			if (dirty & /*moreSecs*/ 1 && t1_value !== (t1_value = (/*moreSecs*/ ctx[0] ? ` (+${/*moreSecs*/ ctx[0]}s)` : "") + "")) set_data_dev(t1, t1_value);
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
+    			if (detaching) detach_dev(div);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -1096,7 +1313,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(5:0) {#if $fields.current}",
+    		source: "(9:0) {#if $fields.current}",
     		ctx
     	});
 
@@ -1105,7 +1322,7 @@ var app = (function () {
 
     function create_fragment$2(ctx) {
     	let if_block_anchor;
-    	let if_block = /*$fields*/ ctx[0].current && create_if_block(ctx);
+    	let if_block = /*$fields*/ ctx[1].current && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -1120,7 +1337,7 @@ var app = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*$fields*/ ctx[0].current) {
+    			if (/*$fields*/ ctx[1].current) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -1153,19 +1370,47 @@ var app = (function () {
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $maxPos;
     	let $fields;
     	validate_store(fields, 'fields');
-    	component_subscribe($$self, fields, $$value => $$invalidate(0, $fields = $$value));
+    	component_subscribe($$self, fields, $$value => $$invalidate(1, $fields = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Buttons', slots, []);
+    	let moreSecs = 1;
+    	let { maxPos } = info;
+    	validate_store(maxPos, 'maxPos');
+    	component_subscribe($$self, maxPos, value => $$invalidate(3, $maxPos = value));
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Buttons> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ fields, $fields });
-    	return [$fields];
+    	$$self.$capture_state = () => ({
+    		fields,
+    		info,
+    		moreSecs,
+    		maxPos,
+    		$maxPos,
+    		$fields
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('moreSecs' in $$props) $$invalidate(0, moreSecs = $$props.moreSecs);
+    		if ('maxPos' in $$props) $$invalidate(2, maxPos = $$props.maxPos);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$maxPos*/ 8) {
+    			$$invalidate(0, moreSecs = (info.nextMax() - $maxPos) / 1000);
+    		}
+    	};
+
+    	return [moreSecs, $fields, maxPos, $maxPos];
     }
 
     class Buttons extends SvelteComponentDev {
@@ -1211,8 +1456,8 @@ var app = (function () {
     			t3 = space();
     			create_component(buttons.$$.fragment);
     			attr_dev(h1, "class", "text-5xl font-bold m-4");
-    			add_location(h1, file$1, 7, 4, 209);
-    			attr_dev(div, "class", "w-full max-w-xl scale-90 my-[-10vh]");
+    			add_location(h1, file$1, 7, 4, 230);
+    			attr_dev(div, "class", "w-full max-w-xl scale-90 my-[-10vh] lg:scale-100 lg:my-0");
     			add_location(div, file$1, 6, 0, 154);
     		},
     		l: function claim(nodes) {

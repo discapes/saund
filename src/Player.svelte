@@ -1,33 +1,59 @@
 <script>
-    import { SOTD } from "./music.js";
+    import { SOTD, info } from "./music.js";
     import { tick } from "svelte";
+    let barWidth;
 
     let wid;
-    let currentPosition = 0; // ms
+    let ready = false;
+    const { cPos, playing, maxPos } = info;
     tick().then(() => {
         wid = SC.Widget("soundcloud");
-        wid.bind(
-            SC.Widget.Events.PLAY_PROGRESS,
-            (e) => (currentPosition = e.currentPosition)
-        );
+        wid.bind(SC.Widget.Events.PLAY_PROGRESS, (e) => {
+            if (e.currentPosition >= $maxPos) {
+                wid.pause();
+                playing.set(false);
+            } else {
+                cPos.set(e.currentPosition);
+            }
+        });
+        wid.bind(SC.Widget.Events.READY, () => ready = true);
     });
 
-    let playing = false;
     function play() {
-        playing = !playing;
-        if (playing) {
+        playing.set(!$playing);
+        if ($playing) {
             wid.seekTo(0);
-            currentPosition = 0;
+            cPos.set(0);
+            wid.play();
+        } else {
+            wid.pause();
         }
-        wid.toggle();
     }
 </script>
 
-<div style="width:{currentPosition/100}%;" class="h-5 mt-5 {playing?"bg-white":"bg-neutral-100"}" />
+<div bind:clientWidth={barWidth} class="border border-2 mt-3 h-5 relative">
+    <div
+        class="h-full absolute bg-white/30 overflow-hidden"
+        style="width:{$maxPos/(16*1000)*100}%"
+    >
+        <div
+            style="width: {$cPos / $maxPos * 100}%; background-size: {barWidth}px 100%;"
+            class="h-full {$playing
+                ? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
+                : 'bg-gradient-to-r from-correct-500/70 via-incorrect-500/70 to-incorrect-500/70'}"
+        />
+    </div>
+    <div class="w-px h-full absolute bg-white left-1/16" />
+    <div class="w-px h-full absolute bg-white left-2/16" />
+    <div class="w-px h-full absolute bg-white left-4/16" />
+    <div class="w-px h-full absolute bg-white left-7/16" />
+    <div class="w-px h-full absolute bg-white left-11/16" />
+</div>
 
 <button
     class="animation m-4 cursor-pointer border-transparent border-l-neutral-100 hover:border-l-white"
-    class:playing
+    disabled={!ready}
+    class:playing={$playing}
     on:click={play}
 />
 

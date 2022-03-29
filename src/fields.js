@@ -1,5 +1,5 @@
 import { tick } from 'svelte'
-import { SOTD } from './music.js'
+import { SOTD, info } from './music.js'
 import { writable } from 'svelte/store';
 
 export const fields = writable(makeFields());
@@ -9,13 +9,16 @@ function makeFields() {
     fieldsObj.i = 0;
     fieldsObj.current = fieldsObj[fieldsObj.i];
 
-    fieldsObj.next = () => fieldsObj.current = fieldsObj[++fieldsObj.i];
+    fieldsObj.next = () => {
+        fieldsObj.current = fieldsObj[++fieldsObj.i];
+        info.maxPos.set(info.nextMax());
+    };
     fieldsObj.disable = () => fieldsObj.current = null;
     fieldsObj.skip = () => {
         fieldsObj.current.class = "skipped";
         fieldsObj.current.val = "SKIPPED";
         fieldsObj.next();
-        tick().then(() => fieldsObj.current.elem.focus());
+        tick().then(() => fieldsObj.current?.elem?.focus());
         fields.update((o) => o);
     }
 

@@ -25,18 +25,20 @@
 </script>
 
 {#each $fields as field}
+<div class="bg-gradient-to-r from-primary2-500/30 to-secondary2-500/30 w-full h-10 my-2">
 	<input
 		bind:this={field.elem}
 		bind:value={field.val}
 		disabled={field !== $fields.current}
 		on:keydown={kd} 
-		class="{field.class ? field.class : "bg-gradient-to-r to-primary-500 from-secondary-500"} 
-		border border-white focus:outline outline-2 outline-white
+		class="{field.class ? field.class : "bg-transparent"}
+		border focus:outline outline-2 outline-white
 		placeholder:text-neutral-200 select-none
-		p-1.5 w-full h-10 my-1 text-xl"
+		p-1.5 text-xl w-full "
 		id="guessfield"
 		placeholder={field === $fields.current ? "Start typing..." : ""}
 	/>
+</div>
 {/each}
 
 <style lang="postcss">
