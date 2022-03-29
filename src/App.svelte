@@ -19,8 +19,8 @@
 	@tailwind components;
 	@tailwind utilities;
 
-	body {
-		height: 100vh;
+	body, html {
+		height: 100%;
 	}
 	* {
 		border-radius: 10px;
