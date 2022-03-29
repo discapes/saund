@@ -1211,8 +1211,8 @@ var app = (function () {
     			t3 = space();
     			create_component(buttons.$$.fragment);
     			attr_dev(h1, "class", "text-5xl font-bold m-4");
-    			add_location(h1, file$1, 7, 4, 190);
-    			attr_dev(div, "class", "w-full max-w-xl ");
+    			add_location(h1, file$1, 7, 4, 198);
+    			attr_dev(div, "class", "w-full max-w-xl scale-90");
     			add_location(div, file$1, 6, 0, 154);
     		},
     		l: function claim(nodes) {
@@ -1302,7 +1302,7 @@ var app = (function () {
     		c: function create() {
     			div = element("div");
     			create_component(view.$$.fragment);
-    			attr_dev(div, "class", "bg-gradient-to-r from-primary-500 to-secondary-500 flex justify-center items-center h-full rounded-none");
+    			attr_dev(div, "class", "bg-gradient-to-r from-primary-500 to-secondary-500 flex justify-center items-center h-screen rounded-none overflow-auto");
     			add_location(div, file, 4, 0, 59);
     		},
     		l: function claim(nodes) {

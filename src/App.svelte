@@ -8,8 +8,9 @@
 	 flex
 	 justify-center
 	 items-center
-	 h-full
-	 rounded-none"
+	 h-screen
+	 rounded-none
+	 overflow-auto"
 >
 	<View />
 </div>
@@ -19,9 +20,6 @@
 	@tailwind components;
 	@tailwind utilities;
 
-	body, html {
-		height: 100%;
-	}
 	* {
 		border-radius: 10px;
 	}
@@ -32,4 +30,3 @@
 		color: white;
 	}
 </style>
-
