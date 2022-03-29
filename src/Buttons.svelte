@@ -3,7 +3,7 @@
 </script>
 
 {#if $fields.current}
-<div class="flex my-8">
+<div class="flex my-4">
     <div class="grow mr-2">
         <button class="
         cursor-pointer border w-full h-full text-xl p-5 

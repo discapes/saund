@@ -1044,7 +1044,7 @@ var app = (function () {
     			add_location(button1, file$2, 13, 8, 371);
     			attr_dev(div1, "class", "grow ml-2");
     			add_location(div1, file$2, 12, 4, 338);
-    			attr_dev(div2, "class", "flex my-8");
+    			attr_dev(div2, "class", "flex my-4");
     			add_location(div2, file$2, 5, 0, 86);
     		},
     		m: function mount(target, anchor) {
@@ -1211,8 +1211,8 @@ var app = (function () {
     			t3 = space();
     			create_component(buttons.$$.fragment);
     			attr_dev(h1, "class", "text-5xl font-bold m-4");
-    			add_location(h1, file$1, 7, 4, 198);
-    			attr_dev(div, "class", "w-full max-w-xl scale-90");
+    			add_location(h1, file$1, 7, 4, 209);
+    			attr_dev(div, "class", "w-full max-w-xl scale-90 my-[-10vh]");
     			add_location(div, file$1, 6, 0, 154);
     		},
     		l: function claim(nodes) {
