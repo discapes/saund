@@ -6,7 +6,7 @@ Demo: https://discapes.github.io/heardle-minimal/
 Install the dependencies...
 
 ```bash
-cd svelte-app
+cd heardle-minimal
 npm install
 ```
 
