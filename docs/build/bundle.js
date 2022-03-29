@@ -521,6 +521,7 @@ var app = (function () {
             },
             resultItem: {
                 highlight: true,
+                class: ""
             },
             events: {
                 input: {
@@ -541,6 +542,7 @@ var app = (function () {
                     }
                 },
                 noResults: true,
+                class: "border bg-black relative mx-[-1px]"
             },
             threshold: 3,
             searchEngine: "loose",
@@ -613,6 +615,7 @@ var app = (function () {
         maxPos: writable(1*1000),
         cPos: writable(0),
         playing: writable(false),
+        resetOnPlay: writable(true),
         nextMax() {
             switch (getStoreVal(this.maxPos)) {
                 case 1000: 
@@ -680,6 +683,7 @@ var app = (function () {
         fieldsObj.next = () => {
             fieldsObj.current = fieldsObj[++fieldsObj.i];
             info.maxPos.set(info.nextMax());
+            info.resetOnPlay.set(false);
         };
         fieldsObj.disable = () => fieldsObj.current = null;
         fieldsObj.skip = () => {
@@ -1012,36 +1016,36 @@ var app = (function () {
     			set_style(div0, "width", /*$cPos*/ ctx[4] / /*$maxPos*/ ctx[3] * 100 + "%");
     			set_style(div0, "background-size", /*barWidth*/ ctx[0] + "px 100%");
 
-    			attr_dev(div0, "class", div0_class_value = "h-full " + (/*$playing*/ ctx[2]
+    			attr_dev(div0, "class", div0_class_value = "h-full border-r box-content border-skipped-900 " + (/*$playing*/ ctx[2]
     			? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
     			: 'bg-gradient-to-r from-correct-500/70 via-incorrect-500/70 to-incorrect-500/70'));
 
-    			add_location(div0, file$3, 38, 8, 1052);
+    			add_location(div0, file$3, 42, 8, 1207);
     			attr_dev(div1, "class", "h-full absolute bg-white/30 overflow-hidden");
     			set_style(div1, "width", /*$maxPos*/ ctx[3] / (16 * 1000) * 100 + "%");
-    			add_location(div1, file$3, 34, 4, 922);
+    			add_location(div1, file$3, 38, 4, 1069);
     			attr_dev(div2, "class", "w-px h-full absolute bg-white left-1/16");
-    			add_location(div2, file$3, 45, 4, 1405);
+    			add_location(div2, file$3, 50, 4, 1619);
     			attr_dev(div3, "class", "w-px h-full absolute bg-white left-2/16");
-    			add_location(div3, file$3, 46, 4, 1466);
+    			add_location(div3, file$3, 51, 4, 1680);
     			attr_dev(div4, "class", "w-px h-full absolute bg-white left-4/16");
-    			add_location(div4, file$3, 47, 4, 1527);
+    			add_location(div4, file$3, 52, 4, 1741);
     			attr_dev(div5, "class", "w-px h-full absolute bg-white left-7/16");
-    			add_location(div5, file$3, 48, 4, 1588);
+    			add_location(div5, file$3, 53, 4, 1802);
     			attr_dev(div6, "class", "w-px h-full absolute bg-white left-11/16");
-    			add_location(div6, file$3, 49, 4, 1649);
+    			add_location(div6, file$3, 54, 4, 1863);
     			attr_dev(div7, "class", "border border-2 mt-3 h-5 relative");
-    			add_render_callback(() => /*div7_elementresize_handler*/ ctx[9].call(div7));
-    			add_location(div7, file$3, 33, 0, 841);
+    			add_render_callback(() => /*div7_elementresize_handler*/ ctx[10].call(div7));
+    			add_location(div7, file$3, 37, 0, 988);
     			attr_dev(button, "class", "animation m-4 cursor-pointer border-transparent border-l-neutral-100 hover:border-l-white svelte-8pxbw6");
     			button.disabled = button_disabled_value = !/*ready*/ ctx[1];
     			toggle_class(button, "playing", /*$playing*/ ctx[2]);
-    			add_location(button, file$3, 52, 0, 1717);
+    			add_location(button, file$3, 57, 0, 1931);
     			attr_dev(iframe, "id", "soundcloud");
     			attr_dev(iframe, "allow", "autoplay");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://w.soundcloud.com/player/?url=" + SOTD.url)) attr_dev(iframe, "src", iframe_src_value);
     			set_style(iframe, "display", "none");
-    			add_location(iframe, file$3, 59, 0, 1909);
+    			add_location(iframe, file$3, 64, 0, 2123);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1060,14 +1064,14 @@ var app = (function () {
     			append_dev(div7, div5);
     			append_dev(div7, t4);
     			append_dev(div7, div6);
-    			div7_resize_listener = add_resize_listener(div7, /*div7_elementresize_handler*/ ctx[9].bind(div7));
+    			div7_resize_listener = add_resize_listener(div7, /*div7_elementresize_handler*/ ctx[10].bind(div7));
     			insert_dev(target, t5, anchor);
     			insert_dev(target, button, anchor);
     			insert_dev(target, t6, anchor);
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(button, "click", /*play*/ ctx[8], false, false, false);
+    				dispose = listen_dev(button, "click", /*play*/ ctx[9], false, false, false);
     				mounted = true;
     			}
     		},
@@ -1080,7 +1084,7 @@ var app = (function () {
     				set_style(div0, "background-size", /*barWidth*/ ctx[0] + "px 100%");
     			}
 
-    			if (dirty & /*$playing*/ 4 && div0_class_value !== (div0_class_value = "h-full " + (/*$playing*/ ctx[2]
+    			if (dirty & /*$playing*/ 4 && div0_class_value !== (div0_class_value = "h-full border-r box-content border-skipped-900 " + (/*$playing*/ ctx[2]
     			? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
     			: 'bg-gradient-to-r from-correct-500/70 via-incorrect-500/70 to-incorrect-500/70'))) {
     				attr_dev(div0, "class", div0_class_value);
@@ -1124,6 +1128,7 @@ var app = (function () {
     }
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $resetOnPlay;
     	let $playing;
     	let $maxPos;
     	let $cPos;
@@ -1132,13 +1137,15 @@ var app = (function () {
     	let barWidth;
     	let wid;
     	let ready = false;
-    	const { cPos, playing, maxPos } = info;
+    	const { cPos, playing, maxPos, resetOnPlay } = info;
     	validate_store(cPos, 'cPos');
     	component_subscribe($$self, cPos, value => $$invalidate(4, $cPos = value));
     	validate_store(playing, 'playing');
     	component_subscribe($$self, playing, value => $$invalidate(2, $playing = value));
     	validate_store(maxPos, 'maxPos');
     	component_subscribe($$self, maxPos, value => $$invalidate(3, $maxPos = value));
+    	validate_store(resetOnPlay, 'resetOnPlay');
+    	component_subscribe($$self, resetOnPlay, value => $$invalidate(12, $resetOnPlay = value));
 
     	tick().then(() => {
     		wid = SC.Widget("soundcloud");
@@ -1147,6 +1154,7 @@ var app = (function () {
     			if (e.currentPosition >= $maxPos) {
     				wid.pause();
     				playing.set(false);
+    				resetOnPlay.set(true);
     			} else {
     				cPos.set(e.currentPosition);
     			}
@@ -1159,8 +1167,12 @@ var app = (function () {
     		playing.set(!$playing);
 
     		if ($playing) {
-    			wid.seekTo(0);
-    			cPos.set(0);
+    			if ($resetOnPlay) {
+    				wid.seekTo(0);
+    				cPos.set(0);
+    			}
+
+    			resetOnPlay.set(true);
     			wid.play();
     		} else {
     			wid.pause();
@@ -1188,7 +1200,9 @@ var app = (function () {
     		cPos,
     		playing,
     		maxPos,
+    		resetOnPlay,
     		play,
+    		$resetOnPlay,
     		$playing,
     		$maxPos,
     		$cPos
@@ -1213,6 +1227,7 @@ var app = (function () {
     		cPos,
     		playing,
     		maxPos,
+    		resetOnPlay,
     		play,
     		div7_elementresize_handler
     	];

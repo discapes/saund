@@ -12,6 +12,7 @@ function makeFields() {
     fieldsObj.next = () => {
         fieldsObj.current = fieldsObj[++fieldsObj.i];
         info.maxPos.set(info.nextMax());
+        info.resetOnPlay.set(false);
     };
     fieldsObj.disable = () => fieldsObj.current = null;
     fieldsObj.skip = () => {

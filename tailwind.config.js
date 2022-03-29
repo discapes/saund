@@ -33,5 +33,6 @@ module.exports = {
   ],
   content: [
     "./src/**/*.svelte",
+    "./src/**/*.js",
   ]
 };
