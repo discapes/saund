@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import { genAC } from "./ac.js";
-	import { fields } from "./fields.js"
+	import { fields } from "./fields.js";
 
 	onMount(() => {
 		for (let f of $fields) {
@@ -15,31 +15,39 @@
 			$fields.submit();
 		} else if (e.key === "Tab") {
 			try {
-			$fields.current.ac.select();
+				$fields.current.ac.select();
 			} catch {}
 		} else {
 			return;
 		}
 		e.preventDefault();
 	}
+	let fieldsHeight;
 </script>
 
-{#each $fields as field}
-<div class="bg-gradient-to-r from-primary2-500/30 to-secondary2-500/30 w-full h-10 my-2">
-	<input
-		bind:this={field.elem}
-		bind:value={field.val}
-		disabled={field !== $fields.current}
-		on:keydown={kd} 
-		class="{field.class ? field.class : "bg-transparent"}
+<div bind:clientHeight={fieldsHeight}>
+{#each $fields as field, i}
+	<div
+		class="bg-gradient-to-t from-primary2-500/20 to-secondary2-500/70
+		 w-full h-10 my-2"
+		style="background-size: 100% {fieldsHeight}px;
+				background-position: 0 -{i*44}px"
+	>
+		<input
+			bind:this={field.elem}
+			bind:value={field.val}
+			disabled={field !== $fields.current}
+			on:keydown={kd}
+			class="{field.class ? field.class : 'bg-transparent'}
 		border focus:outline outline-2 outline-white
 		placeholder:text-neutral-200 select-none
 		p-1.5 text-xl w-full "
-		id="guessfield"
-		placeholder={field === $fields.current ? "Start typing..." : ""}
-	/>
-</div>
+			id="guessfield"
+			placeholder={field === $fields.current ? "Start typing..." : ""}
+		/>
+	</div>
 {/each}
+</div>
 
 <style lang="postcss">
 	.correct {

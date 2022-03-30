@@ -3,17 +3,18 @@
     import { tick } from "svelte";
     let barWidth;
 
+    const formatNum = (n) => (n > 9 ? n : "0" + n);
+
     let ready = false;
     const { cPos, playing, maxPos, resetOnPlay } = info;
     tick().then(() => {
-        info.wid = SC.Widget("soundcloud");        
+        info.wid = SC.Widget("soundcloud");
         info.wid.bind(SC.Widget.Events.PLAY_PROGRESS, (e) => {
+            cPos.set(e.currentPosition);
             if (e.currentPosition >= $maxPos) {
                 info.wid.pause();
                 playing.set(false);
                 resetOnPlay.set(true);
-            } else {
-                cPos.set(e.currentPosition);
             }
         });
         info.wid.bind(SC.Widget.Events.READY, () => (ready = true));
@@ -34,7 +35,10 @@
     }
 </script>
 
-<div bind:clientWidth={barWidth} class="border border-2 mt-3 h-5 relative overflow-hidden">
+<div
+    bind:clientWidth={barWidth}
+    class="border border-2 mt-3 h-5 relative overflow-hidden"
+>
     <div
         class="h-full absolute bg-white/30 overflow-hidden"
         style="width:{($maxPos / (16 * 1000)) * 100}%"
@@ -42,8 +46,9 @@
         <div
             style="width: {($cPos / $maxPos) *
                 100}%; background-size: {barWidth}px 100%;"
-            class="h-full border-r box-content border-skipped-900 {$playing
-                ? ' bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
+            class="h-full border-r box-content border-skipped-900 
+                {$playing
+                ? 'bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
                 : 'bg-gradient-to-r from-correct-500/50 via-incorrect-500/50 to-incorrect-500/50'}"
         />
     </div>
@@ -54,12 +59,22 @@
     <div class="w-px h-full absolute bg-white left-11/16" />
 </div>
 
-<button
-    class="animation m-4"
-    disabled={!ready}
-    class:playing={$playing}
-    on:click={play}
-/>
+<div class="mt-4 text-xl relative">
+    <div class="left-0 top-0 absolute">
+        0:{formatNum(Math.floor($cPos / 1000))} 
+        {#if $maxPos <= 16000}
+        / 0:{formatNum($maxPos / 1000)}
+        {/if}
+    </div>
+
+    <button
+        class="animation"
+        disabled={!ready}
+        class:playing={$playing}
+        on:click={play}
+    />
+    <div class="right-0 top-0 absolute">0:16</div>
+</div>
 
 <iframe
     id="soundcloud"
@@ -82,7 +97,7 @@
             border-style: double;
             border-width: 0px 0 0px 60px;
         }
-        &:hover{
+        &:hover {
             border-color: transparent transparent transparent #ffffff;
         }
     }
