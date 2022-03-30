@@ -5,37 +5,45 @@ import { writable } from 'svelte/store';
 export const fields = writable(makeFields());
 
 function makeFields() {
-    let fieldsObj = Array.from({ length: 6 }, Object);
-    fieldsObj.i = 0;
-    fieldsObj.current = fieldsObj[fieldsObj.i];
+    let self = Array.from({ length: 6 }, Object);
+    self.i = 0;
+    self.current = self[self.i];
 
-    fieldsObj.next = () => {
-        fieldsObj.current = fieldsObj[++fieldsObj.i];
-        info.maxPos.set(info.nextMax());
-        info.resetOnPlay.set(false);
+    self.end = () => {
+        self.current = null;
     };
-    fieldsObj.disable = () => fieldsObj.current = null;
-    fieldsObj.skip = () => {
-        fieldsObj.current.class = "skipped";
-        fieldsObj.current.val = "SKIPPED";
-        fieldsObj.next();
-        tick().then(() => fieldsObj.current?.elem?.focus());
+    self.next = () => {
+        self.i++;
+        if (self.i == 6) {
+            self.end();
+            info.maxPos.set(10*60*1000);
+            info.wid.play();
+        } else {
+            self.current = self[self.i];
+            tick().then(() => self.current.elem.focus());
+            info.maxPos.set(info.nextMax());
+            info.resetOnPlay.set(false);
+        }
+    };
+    self.skip = () => {
+        self.current.class = "skipped";
+        self.current.val = "SKIPPED";
+        self.next();
         fields.update((o) => o);
     }
 
-    fieldsObj.submit = () => {
-        fieldsObj.current.val = fieldsObj.current.elem.value; // svelte why do I need to do this
-        if (!fieldsObj.current.ac || fieldsObj.current.val === fieldsObj.current.ac.lastSelectedVal) {
-            if (fieldsObj.current.val == SOTD.name) {
-                fieldsObj.current.class = "correct";
-                fieldsObj.disable();
+    self.submit = () => {
+        self.current.val = self.current.elem.value; // svelte why do I need to do this
+        if (!self.current.ac || self.current.val === self.current.ac.lastSelectedVal) {
+            if (self.current.val == SOTD.name) {
+                self.current.class = "correct";
+                self.end();
             } else {
-                fieldsObj.current.class = "incorrect";
-                fieldsObj.next();
-                tick().then(() => fieldsObj.current.elem.focus());
+                self.current.class = "incorrect";
+                self.next();
             }
             fields.update((o) => o);
         }
     }
-    return fieldsObj;
+    return self;
 }

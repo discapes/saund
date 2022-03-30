@@ -6,6 +6,10 @@ module.exports = {
   },
   theme: {
     extend: {
+      screens: {
+        'touch': { raw: '(hover: none)' },
+        'mouse': { raw: '(hover: hover)' },
+      },
       colors: {
         primary: colors.cyan,
         secondary: colors.blue,

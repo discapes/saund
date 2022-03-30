@@ -20,6 +20,10 @@
 	@tailwind components;
 	@tailwind utilities;
 
+	button {
+		cursor: pointer;
+		border-width: 1px;
+	}
 	html {
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
 			Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
