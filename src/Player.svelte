@@ -9,7 +9,14 @@
         let s = Math.floor(n) % 60;
         return `${min}:${formatNum1(s)}`;
     };
+    function preloadImage(url) {
+        var img = new Image();
+        img.src = url;
+        return url;
+    }
 
+    let duration;
+    let currentSound;
     let ready = false;
     const { cPos, playing, maxPos, resetOnPlay } = info;
     tick().then(() => {
@@ -22,11 +29,14 @@
                 resetOnPlay.set(true);
             }
         });
-        info.wid.bind(SC.Widget.Events.READY, () => (ready = true));
+        info.wid.bind(SC.Widget.Events.READY, (e) => {
+            ready = true;
+            info.wid.getDuration((dur) => (duration = dur));
+            info.wid.getCurrentSound((cs) =>
+                info.artwork.set(preloadImage(cs.artwork_url))
+            );
+        });
     });
-
-    let duration;
-    $: if (ready) info.wid.getDuration((dur) => (duration = dur));
 
     const play = (_playing = !$playing) => {
         playing.set(_playing);
@@ -40,7 +50,7 @@
             info.wid.pause();
         }
         resetOnPlay.set(true);
-    }
+    };
     info.play = play;
 </script>
 

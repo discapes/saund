@@ -19,6 +19,7 @@ export const info = {
     resetOnPlay: writable(true),
     wid: undefined,
     play: undefined,
+    artwork: writable(""),
     nextMax() {
         switch (getStoreVal(this.maxPos)) {
             case 1000: 

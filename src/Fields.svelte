@@ -31,7 +31,7 @@
 		class="bg-gradient-to-t from-primary2-500/20 to-secondary2-500/70
 		 w-full h-10 my-2"
 		style="background-size: 100% {fieldsHeight}px;
-				background-position: 0 -{i*44}px"
+				background-position: 0 -{i*100}%"
 	>
 		<input
 			bind:this={field.elem}
