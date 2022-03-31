@@ -4,7 +4,7 @@
     import Buttons from "./Buttons.svelte";
 </script>
 
-<div class="w-full max-w-xl scale-90 my-[-10vh]">
+<div class="w-full max-w-xl scale-[85%] my-[-10vh]">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Fields />
     <Player />

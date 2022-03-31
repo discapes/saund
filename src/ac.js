@@ -9,7 +9,6 @@ export const genAC = (selectorElem) => {
         },
         resultItem: {
             highlight: true,
-            class: ""
         },
         events: {
             input: {
@@ -30,7 +29,6 @@ export const genAC = (selectorElem) => {
                 }
             },
             noResults: true,
-            class: "border bg-black relative mx-[-1px]"
         },
         threshold: 3,
         searchEngine: "loose",

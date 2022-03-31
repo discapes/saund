@@ -16,7 +16,6 @@
     }
 
     let duration;
-    let currentSound;
     let ready = false;
     const { cPos, playing, maxPos, resetOnPlay } = info;
     tick().then(() => {
@@ -29,7 +28,7 @@
                 resetOnPlay.set(true);
             }
         });
-        info.wid.bind(SC.Widget.Events.READY, (e) => {
+        info.wid.bind(SC.Widget.Events.READY, () => {
             ready = true;
             info.wid.getDuration((dur) => (duration = dur));
             info.wid.getCurrentSound((cs) =>
@@ -56,7 +55,7 @@
 
 <div
     bind:clientWidth={barWidth}
-    class="border border-2 mt-3 h-5 relative overflow-hidden"
+    class="border border-2 mt-20 h-5 relative overflow-hidden"
 >
     <div
         class="h-full absolute bg-white/30 overflow-hidden"
