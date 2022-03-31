@@ -11,18 +11,18 @@ function makeFields() {
 
     self.end = () => {
         self.current = null;
+        info.maxPos.set(10*60*1000);
+        info.play(true);
     };
     self.next = () => {
         self.i++;
+        info.resetOnPlay.set(false);
         if (self.i == 6) {
             self.end();
-            info.maxPos.set(10*60*1000);
-            info.wid.play();
         } else {
             self.current = self[self.i];
             tick().then(() => self.current.elem.focus());
             info.maxPos.set(info.nextMax());
-            info.resetOnPlay.set(false);
         }
     };
     self.skip = () => {

@@ -3,7 +3,12 @@
     import { tick } from "svelte";
     let barWidth;
 
-    const formatNum = (n) => (n > 9 ? n : "0" + n);
+    const formatNum1 = (n) => (n > 9 ? n : "0" + n);
+    const formatNum2 = (n) => {
+        let min = Math.floor(n / 60);
+        let s = Math.floor(n) % 60;
+        return `${min}:${formatNum1(s)}`;
+    };
 
     let ready = false;
     const { cPos, playing, maxPos, resetOnPlay } = info;
@@ -20,8 +25,11 @@
         info.wid.bind(SC.Widget.Events.READY, () => (ready = true));
     });
 
-    function play() {
-        playing.set(!$playing);
+    let duration;
+    $: if (ready) info.wid.getDuration((dur) => (duration = dur));
+
+    const play = (_playing = !$playing) => {
+        playing.set(_playing);
         if ($playing) {
             if ($resetOnPlay) {
                 info.wid.seekTo(0);
@@ -33,6 +41,7 @@
         }
         resetOnPlay.set(true);
     }
+    info.play = play;
 </script>
 
 <div
@@ -61,19 +70,22 @@
 
 <div class="mt-4 text-xl relative">
     <div class="left-0 top-0 absolute">
-        0:{formatNum(Math.floor($cPos / 1000))} 
-        {#if $maxPos <= 16000}
-        / 0:{formatNum($maxPos / 1000)}
-        {/if}
+        0:{formatNum1(Math.floor($cPos / 1000))}
     </div>
 
     <button
         class="animation"
         disabled={!ready}
         class:playing={$playing}
-        on:click={play}
+        on:click={() => play()}
     />
-    <div class="right-0 top-0 absolute">0:16</div>
+    <div class="right-0 top-0 absolute">
+        {#if $maxPos <= 16000}
+            0:{formatNum1($maxPos / 1000)}
+        {:else}
+            {formatNum2(duration / 1000)}
+        {/if}
+    </div>
 </div>
 
 <iframe

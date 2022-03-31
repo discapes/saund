@@ -1,18 +1,11 @@
 import autoComplete from "@tarekraafat/autocomplete.js";
+import { options } from './songs.js';
 
 export const genAC = (selectorElem) => {
     let ac = new autoComplete({
         data: {
-            src: [
-                { id: 1, name: "one" },
-                { id: 2, name: "two" },
-                { id: 3, name: "three" },
-                { id: 4, name: "èèèat" },
-                { id: 5, name: "thrèèè" },
-                { id: 6, name: "song1" },
-            ],
+            src: options,
             cache: true,
-            keys: ["name"],
         },
         resultItem: {
             highlight: true,
@@ -21,7 +14,7 @@ export const genAC = (selectorElem) => {
         events: {
             input: {
                 selection: (event) => {
-                    ac.lastSelectedVal = event.detail.selection.value.name;
+                    ac.lastSelectedVal = event.detail.selection.value;
                     ac.input.value = ac.lastSelectedVal;
                 },  
             },
