@@ -1,11 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    function preloadImage(url) {
-        var img = new Image();
-        img.src = url;
-        return url;
-    }
-
+    
     export let song;
 
     export let status = {
@@ -14,10 +9,9 @@
         ready: false,
         paused: true,
     };
-    export let artwork;
+    export let info;
 
     let resetOnToggle = false;
-    let songLength;
     let wid;
 
     export function play() {
@@ -29,7 +23,8 @@
         wid.pause();
     }
     export function toggle() {
-        if (resetOnToggle) seek(0);
+        if (!status.ready) return;
+        if (status.paused && resetOnToggle) seek(0);
         status.paused = !status.paused;
         wid.toggle();
     }
@@ -42,9 +37,6 @@
     }
     export function setDur(dur) {
         status.dur = dur;
-    }
-    export function getSongLength() {
-        return songLength;
     }
 
     onMount(() => {
@@ -59,15 +51,13 @@
 
         wid.bind(SC.Widget.Events.READY, () => {
             status.ready = true;
-            wid.getDuration((l) => (songLength = l));
-            wid.getCurrentSound(
-                (cs) => (artwork = preloadImage(cs.artwork_url))
-            );
+            wid.getCurrentSound((cs) => (info = cs));
         });
     });
 </script>
 
 <iframe
+    allow="autoplay"
     id="soundcloud"
     src="https://w.soundcloud.com/player/?url={song.url}"
     style="display:none"

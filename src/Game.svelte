@@ -8,9 +8,14 @@
     import { tick } from "svelte";
     import { AC } from "./ac";
 
+    function preloadImage(url) {
+        var img = new Image();
+        img.src = url;
+        return url;
+    }
+
     const lengths = [1, 2, 4, 7, 11, 16];
     const song = songs[Math.floor(Math.random() * songs.length)];
-    song.artwork;
 
     let game = {
         over: false,
@@ -21,6 +26,9 @@
     };
     let ac;
     let music;
+    let songInfo;
+    $: if (songInfo?.artwork_url) preloadImage(songInfo.artwork_url);
+    let retryButton;
 
     function guessMade() {
         game.guesses++;
@@ -51,10 +59,11 @@
         guessMade();
     }
     function end() {
-        music.setDur(30*1000);
+        music.setDur(songInfo.duration);
         game.over = true;
         music.seek(0);
         music.play();
+        tick().then(() => retryButton.focus());
     }
 
     tick().then(() => {
@@ -62,17 +71,25 @@
         game.fields[0].focus();
     });
 
+    function kd(e) {
+        if (e.key == "Tab") {
+            music.toggle();
+            e.preventDefault();
+        }
+    }
+
     let buttonHeight = 0;
     let status;
 </script>
 
+<svelte:window on:keydown={kd} />
 <div class="w-full max-w-xl scale-[85%] my-[-10vh]">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
-    <Music {song} bind:artwork={song.artwork} bind:this={music} bind:status/>
+    <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {ac} {submit} {game} />
     {#if music}
         <Player
-            status={status}
+            {status}
             toggle={() => {
                 music.toggle();
                 music.setResetOnToggle(true);
@@ -88,7 +105,12 @@
                 bind:height={buttonHeight}
             />
         {:else}
-            <Credits {song} height={buttonHeight} />
+            <Credits
+                {song}
+                artwork={songInfo.artwork_url}
+                height={buttonHeight}
+                bind:retryButton
+            />
         {/if}
     </div>
 </div>

@@ -1,6 +1,8 @@
 <script>
     export let song;
     export let height;
+    export let retryButton;
+    export let artwork;
 </script>
 
 <div class="flex" style="height: {height}px">
@@ -11,7 +13,7 @@ bg-gradient-to-r from-primary2-500/70 to-secondary2-500/40 text-left border grow
     >
         <a href={song.url} title="Listen to {song.name} on SoundCloud"
             ><div class="flex items-center h-full">
-                <img src={song.artwork} alt={song.name} style="height: calc(100% - 1px)"/>
+                <img src={artwork} alt={song.name} style="height: calc(100% - 1px)"/>
                 <div class="flex-1 mx-3 text-white">
                     <p>{song.name.split(" - ")[1]}</p>
                     <p class="text-sm ">{song.name.split(" - ")[0]}</p>
@@ -61,6 +63,7 @@ bg-gradient-to-r from-primary2-500/70 to-secondary2-500/40 text-left border grow
 bg-submit-700/50 
 touch:active:bg-submit-700/70
 mouse:hover:bg-submit-700/70"
+        bind:this={retryButton}
         on:click={() => location.reload()}>Retry</button
     >
 </div>

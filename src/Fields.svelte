@@ -1,16 +1,10 @@
 <script>
 	export let game;
 	export let submit;
-	export let ac;
 
 	function kd(e) {
 		if (e.key === "Enter") {
 			submit();
-			e.preventDefault();
-		} else if (e.key === "Tab") {
-			try {
-				ac.select();
-			} catch {}
 			e.preventDefault();
 		}
 	}
@@ -35,7 +29,7 @@
 		border focus:outline outline-2 outline-white
 		placeholder:text-neutral-200 select-none
 		p-1.5 text-xl w-full "
-				placeholder={i == game.guesses ? "Start typing..." : ""}
+				placeholder={i == game.guesses ? "Search for song..." : ""}
 			/>
 		</div>
 	{/each}
