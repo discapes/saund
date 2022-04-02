@@ -1,7 +1,7 @@
 import autoComplete from "@tarekraafat/autocomplete.js";
 import { options } from './songs.js';
 
-export const genAC = (selectorElem) => {
+export function AC(field) {
     let ac = new autoComplete({
         data: {
             src: options,
@@ -15,10 +15,10 @@ export const genAC = (selectorElem) => {
                 selection: (event) => {
                     ac.lastSelectedVal = event.detail.selection.value;
                     ac.input.value = ac.lastSelectedVal;
-                },  
+                },
             },
         },
-        selector: () => selectorElem,
+        selector: () => field,
         resultsList: {
             element: (list, data) => {
                 if (!data.results.length) {
@@ -36,4 +36,4 @@ export const genAC = (selectorElem) => {
         submit: true,
     });
     return ac;
-};
+}

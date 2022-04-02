@@ -1,5 +1,5 @@
 <script>
-	import View from "./View.svelte";
+	import Game from "./Game.svelte";
 </script>
 
 <div
@@ -12,7 +12,7 @@
 	 rounded-none
 	 overflow-auto"
 >
-	<View />
+	<Game />
 </div>
 
 <style global lang="postcss">

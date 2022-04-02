@@ -1,56 +1,20 @@
 <script>
-    import { SOTD, info } from "./music.js";
-    import { tick } from "svelte";
-    let barWidth;
+    export let status;
+    export let toggle;
 
-    const formatNum1 = (n) => (n > 9 ? n : "0" + n);
+    let secDur = 0;
+    let secPos = 0;
+    $: secDur = status.dur / 1000;
+    $: secPos = status.pos / 1000;
+
+    const formatNum1 = (n) => (n > 9 ? Math.floor(n) : "0" + Math.floor(n));
     const formatNum2 = (n) => {
-        let min = Math.floor(n / 60);
-        let s = Math.floor(n) % 60;
+        let min = Math.floor(Math.floor(n) / 60);
+        let s = Math.floor(Math.floor(n)) % 60;
         return `${min}:${formatNum1(s)}`;
     };
-    function preloadImage(url) {
-        var img = new Image();
-        img.src = url;
-        return url;
-    }
 
-    let duration;
-    let ready = false;
-    const { cPos, playing, maxPos, resetOnPlay } = info;
-    tick().then(() => {
-        info.wid = SC.Widget("soundcloud");
-        info.wid.bind(SC.Widget.Events.PLAY_PROGRESS, (e) => {
-            cPos.set(e.currentPosition);
-            if (e.currentPosition >= $maxPos) {
-                info.wid.pause();
-                playing.set(false);
-                resetOnPlay.set(true);
-            }
-        });
-        info.wid.bind(SC.Widget.Events.READY, () => {
-            ready = true;
-            info.wid.getDuration((dur) => (duration = dur));
-            info.wid.getCurrentSound((cs) =>
-                info.artwork.set(preloadImage(cs.artwork_url))
-            );
-        });
-    });
-
-    const play = (_playing = !$playing) => {
-        playing.set(_playing);
-        if ($playing) {
-            if ($resetOnPlay) {
-                info.wid.seekTo(0);
-                cPos.set(0);
-            }
-            info.wid.play();
-        } else {
-            info.wid.pause();
-        }
-        resetOnPlay.set(true);
-    };
-    info.play = play;
+    let barWidth;
 </script>
 
 <div
@@ -59,15 +23,15 @@
 >
     <div
         class="h-full absolute bg-white/30 overflow-hidden"
-        style="width:{($maxPos / (16 * 1000)) * 100}%"
+        style="width:{(secDur / 16) * 100}%"
     >
         <div
-            style="width: {($cPos / $maxPos) *
+            style="width: {(secPos / secDur) *
                 100}%; background-size: {barWidth}px 100%;"
-            class="h-full border-r box-content border-skipped-900 
-                {$playing
-                ? 'bg-gradient-to-r from-correct-500 via-incorrect-500 to-incorrect-500'
-                : 'bg-gradient-to-r from-correct-500/50 via-incorrect-500/50 to-incorrect-500/50'}"
+            class="h-full border-r box-content border-skipped-900 bg-gradient-to-r f
+                {!status.paused
+                ? 'from-correct-500 via-incorrect-500 to-incorrect-500'
+                : 'from-correct-500/50 via-incorrect-500/50 to-incorrect-500/50'}"
         />
     </div>
     <div class="w-px h-full absolute bg-white left-1/16" />
@@ -79,30 +43,18 @@
 
 <div class="mt-4 text-xl relative">
     <div class="left-0 top-0 absolute">
-        0:{formatNum1(Math.floor($cPos / 1000))}
+        0:{formatNum1(secPos)}
     </div>
-
     <button
         class="animation"
-        disabled={!ready}
-        class:playing={$playing}
-        on:click={() => play()}
+        disabled={!status.ready}
+        class:playing={!status.paused}
+        on:click={toggle}
     />
     <div class="right-0 top-0 absolute">
-        {#if $maxPos <= 16000}
-            0:{formatNum1($maxPos / 1000)}
-        {:else}
-            {formatNum2(duration / 1000)}
-        {/if}
+        {formatNum2(secDur)}
     </div>
 </div>
-
-<iframe
-    id="soundcloud"
-    allow="autoplay"
-    src="https://w.soundcloud.com/player/?url={SOTD.url}"
-    style="display:none"
-/>
 
 <style lang="scss">
     .animation {

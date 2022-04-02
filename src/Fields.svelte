@@ -1,52 +1,44 @@
 <script>
-	import { onMount } from "svelte";
-	import { genAC } from "./ac.js";
-	import { fields } from "./fields.js";
-
-	onMount(() => {
-		for (let f of $fields) {
-			f.ac = genAC(f.elem);
-		}
-		$fields.current.elem.focus();
-	});
+	export let game;
+	export let submit;
+	export let ac;
 
 	function kd(e) {
 		if (e.key === "Enter") {
-			$fields.submit();
+			submit();
+			e.preventDefault();
 		} else if (e.key === "Tab") {
 			try {
-				$fields.current.ac.select();
+				ac.select();
 			} catch {}
-		} else {
-			return;
+			e.preventDefault();
 		}
-		e.preventDefault();
 	}
-	let fieldsHeight;
+
+	let bgHeight;
 </script>
 
-<div bind:clientHeight={fieldsHeight}>
-{#each $fields as field, i}
-	<div
-		class="bg-gradient-to-t from-primary2-500/20 to-secondary2-500/70
+<div bind:clientHeight={bgHeight}>
+	{#each game.fields as _, i}
+		<div
+			class="bg-gradient-to-t from-primary2-500/20 to-secondary2-500/70
 		 w-full h-10 my-2"
-		style="background-size: 100% {fieldsHeight}px;
-				background-position: 0 -{i*100}%"
-	>
-		<input
-			bind:this={field.elem}
-			bind:value={field.val}
-			disabled={field !== $fields.current}
-			on:keydown={kd}
-			class="{field.class ? field.class : 'bg-transparent'}
+			style="background-size: 100% {bgHeight}px;
+				background-position: 0 -{i * 100}%"
+		>
+			<input
+				bind:this={game.fields[i]}
+				disabled={i != game.guesses}
+				on:keydown={kd}
+				class="{game.statuses[i]}
+				bg-transparent
 		border focus:outline outline-2 outline-white
 		placeholder:text-neutral-200 select-none
 		p-1.5 text-xl w-full "
-			id="guessfield"
-			placeholder={field === $fields.current ? "Start typing..." : ""}
-		/>
-	</div>
-{/each}
+				placeholder={i == game.guesses ? "Start typing..." : ""}
+			/>
+		</div>
+	{/each}
 </div>
 
 <style lang="postcss">
