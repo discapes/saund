@@ -16,7 +16,7 @@
 	{#each game.fields as _, i}
 		<div
 			class="bg-gradient-to-t from-primary2-500/20 to-secondary2-500/70
-		 w-full h-10 my-2"
+		 w-full h-10 mt-2"
 			style="background-size: 100% {bgHeight}px;
 				background-position: 0 -{i * 100}%"
 		>
@@ -29,7 +29,7 @@
 		border focus:outline outline-2 outline-white
 		placeholder:text-neutral-200 select-none
 		p-1.5 text-xl w-full "
-				placeholder={i == game.guesses ? "Search for song..." : ""}
+				placeholder={i == game.guesses ? "Search for a song..." : ""}
 			/>
 		</div>
 	{/each}

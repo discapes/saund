@@ -73,6 +73,7 @@
 
     function kd(e) {
         if (e.key == "Tab") {
+            showTip = false;
             music.toggle();
             e.preventDefault();
         }
@@ -80,6 +81,7 @@
 
     let buttonHeight = 0;
     let status;
+    let showTip = true;
 </script>
 
 <svelte:window on:keydown={kd} />
@@ -87,10 +89,17 @@
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {ac} {submit} {game} />
+
+    <div class="h-20 flex items-center justify-center">
+        {#if showTip}
+        Click the play button or press Tab
+        {/if}
+    </div>
     {#if music}
         <Player
             {status}
             toggle={() => {
+                showTip = false;
                 music.toggle();
                 music.setResetOnToggle(true);
             }}

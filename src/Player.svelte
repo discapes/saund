@@ -19,7 +19,7 @@
 
 <div
     bind:clientWidth={barWidth}
-    class="border border-2 mt-20 h-5 relative overflow-hidden"
+    class="border border-2 h-5 relative overflow-hidden"
 >
     <div
         class="h-full absolute bg-white/30 overflow-hidden"
