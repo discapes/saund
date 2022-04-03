@@ -134,6 +134,7 @@
     async function kd(e) {
         if (e.key == "Tab") {
             e.preventDefault();
+            if (!status?.ready) return;
             if (testAutoplay && !(await autoplayAllowed())) {
                 tip = clickAnywhereTip;
             } else {
@@ -154,7 +155,7 @@
 </script>
 
 <svelte:window on:keydown={kd} on:click={clk} />
-<div class="w-full max-w-xl">
+<div class="w-full max-w-xl p-2">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {submit} {game} />

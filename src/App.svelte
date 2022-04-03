@@ -52,7 +52,7 @@
 		-webkit-transition: 0.15s ease-in-out;
 	}
 
-	.autoComplete_wrapper > ul > li {
+	.autoComplete_wrapper > ul > li, .no_result {
 		padding: 0.5rem 0.75rem;
 		@apply border;
 		letter-spacing: 1px;

@@ -1,4 +1,7 @@
 <script>
+import Game from "./Game.svelte";
+
+
     export let status;
     export let gameOver;
     export let toggle;
@@ -18,6 +21,7 @@
     let barWidth;
 </script>
 
+<div class:opacity-50={!status.ready}>
 <div
     bind:clientWidth={barWidth}
     class="border border-2 h-5 relative overflow-hidden"
@@ -57,6 +61,7 @@
     <div class="right-0 top-0 absolute">
         {formatNum2(secDur)}
     </div>
+</div>
 </div>
 
 <style lang="scss">

@@ -11,7 +11,7 @@
 	}
 </script>
 
-<div class="flex" style="height: {Math.max(height,nameHeight+10)}px">
+<div class="flex" style="height: {Math.max(height+2,nameHeight+10)}px">
     <div
         class="
 bg-gradient-to-r from-primary2-500/70 to-secondary2-500/40 text-left border grow h-full
