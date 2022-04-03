@@ -1,4 +1,5 @@
 <script>
+	import { tick } from "svelte";
 	export let game;
 	export let submit;
 
@@ -7,6 +8,9 @@
 			submit();
 			e.preventDefault();
 		}
+	}
+	function blur() {
+		setTimeout(() => game.fields[game.guesses].focus(), 0);
 	}
 
 	let bgHeight;
@@ -24,6 +28,7 @@
 				bind:this={game.fields[i]}
 				disabled={i != game.guesses}
 				on:keydown={kd}
+				on:blur={blur}
 				class="{game.statuses[i]}
 				bg-transparent
 		border focus:outline outline-2 outline-white

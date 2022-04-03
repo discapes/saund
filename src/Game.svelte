@@ -78,6 +78,7 @@
         if (game.guesses == 6) {
             end();
         } else {
+            ac.close();
             ac = AC(game.fields[game.guesses]);
             tick().then(() => game.fields[game.guesses].focus());
             music.setDur(lengths[game.guesses] * 1000);
@@ -86,7 +87,10 @@
     }
     function submit() {
         if (game.fields[game.guesses].value === "") skip();
-        else if (game.fields[game.guesses].value == ac.lastSelectedVal) {
+        else if (
+            game.fields[game.guesses].value.toLowerCase() ==
+            ac.lastSelectedVal?.toLowerCase()
+        ) {
             if (game.fields[game.guesses].value == song.name) {
                 game.statuses[game.guesses] = "correct";
                 end();
@@ -107,9 +111,10 @@
         music.seek(0);
         music.play();
         tick().then(() => retryButton.focus());
+        tip = "Press Enter to go to next song";
     }
     function toggle() {
-        tip = "";
+        tip = "Select with arrow keys or mouse, press Enter to confirm/skip";
         music.toggle();
         music.setResetOnToggle(true);
     }
@@ -119,24 +124,27 @@
         game.fields[0].focus();
     });
 
-    let tip = "Click the play button or press Tab";
-    const clickAnywhereTip = "Click anywhere to enable using Tab";
+    const clickAnywhereTip =
+        "Click anywhere or turn on autoplay to enable using Tab";
+    const clickPlayTip = "Click the play button or press Tab";
+
+    let tip = clickPlayTip;
     let testAutoplay = navigator.userAgent.toLowerCase().includes("firefox");
     async function kd(e) {
         if (e.key == "Tab") {
+            e.preventDefault();
             if (testAutoplay && !(await autoplayAllowed())) {
                 tip = clickAnywhereTip;
             } else {
                 testAutoplay = false;
                 toggle();
             }
-            e.preventDefault();
         }
     }
     function clk() {
         if (tip == clickAnywhereTip) {
             testAutoplay = false;
-            tip = "";
+            tip = clickPlayTip;
         }
     }
 
