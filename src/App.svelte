@@ -73,4 +73,19 @@
 	.autoComplete_wrapper > ul > li:hover {
 		@apply bg-gradient-to-r from-primary2-500/100 to-secondary2-500/100;
 	}
+
+	@keyframes fade-out {
+		0% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+	:focus-visible {
+		outline: none;
+	}
 </style>

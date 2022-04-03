@@ -13,6 +13,49 @@
         img.src = url;
         return url;
     }
+    function message(text, duration) {
+        let div = document.createElement("div");
+        div.innerText = text;
+        div.className = "left-1/2 top-1/2 fixed bg-black/80 p-5 rounded-xl";
+        div.style.transform = "translate(-50%, -50%)";
+        div.style.animation = `fade-out ${duration}s`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), duration * 1000);
+    }
+    async function autoplayAllowed() {
+        let data = new Blob(
+            [
+                new Uint8Array([
+                    255, 227, 24, 196, 0, 0, 0, 3, 72, 1, 64, 0, 0, 4, 132, 16,
+                    31, 227, 192, 225, 76, 255, 67, 12, 255, 221, 27, 255, 228,
+                    97, 73, 63, 255, 195, 131, 69, 192, 232, 223, 255, 255, 207,
+                    102, 239, 255, 255, 255, 101, 158, 206, 70, 20, 59, 255,
+                    254, 95, 70, 149, 66, 4, 16, 128, 0, 2, 2, 32, 240, 138,
+                    255, 36, 106, 183, 255, 227, 24, 196, 59, 11, 34, 62, 80,
+                    49, 135, 40, 0, 253, 29, 191, 209, 200, 141, 71, 7, 255,
+                    252, 152, 74, 15, 130, 33, 185, 6, 63, 255, 252, 195, 70,
+                    203, 86, 53, 15, 255, 255, 247, 103, 76, 121, 64, 32, 47,
+                    255, 34, 227, 194, 209, 138, 76, 65, 77, 69, 51, 46, 57, 55,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 255, 227,
+                    24, 196, 73, 13, 153, 210, 100, 81, 135, 56, 0, 170, 170,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170,
+                    170, 170, 170, 170, 170, 170, 170, 170, 170,
+                ]),
+            ],
+            { type: "audio/mpeg" }
+        );
+        let sound = document.createElement("audio");
+        sound.src = URL.createObjectURL(data);
+        try {
+            await sound.play();
+            return true;
+        } catch {
+            return false;
+        }
+    }
 
     const lengths = [1, 2, 4, 7, 11, 16];
     const song = songs[Math.floor(Math.random() * songs.length)];
@@ -65,59 +108,53 @@
         music.play();
         tick().then(() => retryButton.focus());
     }
+    function toggle() {
+        tip = "";
+        music.toggle();
+        music.setResetOnToggle(true);
+    }
 
     tick().then(() => {
         ac = AC(game.fields[0]);
         game.fields[0].focus();
     });
 
-    function kd(e) {
+    let tip = "Click the play button or press Tab";
+    const clickAnywhereTip = "Click anywhere to enable using Tab";
+    let testAutoplay = navigator.userAgent.toLowerCase().includes("firefox");
+    async function kd(e) {
         if (e.key == "Tab") {
-            if (
-                !autoplayAsked &&
-                navigator.userAgent.toLowerCase().includes("firefox")
-            ) {
-                alert("Enable autoplay");
-                autoplayAsked = true;
+            if (testAutoplay && !(await autoplayAllowed())) {
+                tip = clickAnywhereTip;
             } else {
-                showTip = false;
-                music.toggle();
-                music.setResetOnToggle(true);
+                testAutoplay = false;
+                toggle();
             }
             e.preventDefault();
+        }
+    }
+    function clk() {
+        if (tip == clickAnywhereTip) {
+            testAutoplay = false;
+            tip = "";
         }
     }
 
     let buttonHeight = 0;
     let status;
-    let showTip = true;
-    let autoplayAsked = false;
-    var sound      = document.createElement('audio');
-sound.src      = 'https://www.kozco.com/tech/LRMonoPhase4.mp3';
-//sound.src = URL.createObjectURL(AUDIO);
-sound.play();
 </script>
 
-<svelte:window on:keydown={kd} />
+<svelte:window on:keydown={kd} on:click={clk} />
 <div class="w-full max-w-xl scale-[85%] my-[-10vh]">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {submit} {game} />
 
     <div class="h-20 flex items-center justify-center">
-        {#if showTip}
-            Click the play button or press Tab
-        {/if}
+        {tip}
     </div>
     {#if music}
-        <Player
-            {status}
-            toggle={() => {
-                showTip = false;
-                music.toggle();
-                music.setResetOnToggle(true);
-            }}
-        />
+        <Player {status} {toggle} />
     {/if}
     <div class="my-4">
         {#if !game.over}
