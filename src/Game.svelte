@@ -73,9 +73,17 @@
 
     function kd(e) {
         if (e.key == "Tab") {
-            showTip = false;
-            music.toggle();
-            music.setResetOnToggle(true);
+            if (
+                !autoplayAsked &&
+                navigator.userAgent.toLowerCase().includes("firefox")
+            ) {
+                alert("Enable autoplay");
+                autoplayAsked = true;
+            } else {
+                showTip = false;
+                music.toggle();
+                music.setResetOnToggle(true);
+            }
             e.preventDefault();
         }
     }
@@ -83,6 +91,11 @@
     let buttonHeight = 0;
     let status;
     let showTip = true;
+    let autoplayAsked = false;
+    var sound      = document.createElement('audio');
+sound.src      = 'https://www.kozco.com/tech/LRMonoPhase4.mp3';
+//sound.src = URL.createObjectURL(AUDIO);
+sound.play();
 </script>
 
 <svelte:window on:keydown={kd} />
@@ -93,7 +106,7 @@
 
     <div class="h-20 flex items-center justify-center">
         {#if showTip}
-        Click the play button or press Tab
+            Click the play button or press Tab
         {/if}
     </div>
     {#if music}
