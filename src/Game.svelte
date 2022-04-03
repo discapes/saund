@@ -75,6 +75,7 @@
         if (e.key == "Tab") {
             showTip = false;
             music.toggle();
+            music.setResetOnToggle(true);
             e.preventDefault();
         }
     }
@@ -88,7 +89,7 @@
 <div class="w-full max-w-xl scale-[85%] my-[-10vh]">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
-    <Fields {ac} {submit} {game} />
+    <Fields {submit} {game} />
 
     <div class="h-20 flex items-center justify-center">
         {#if showTip}

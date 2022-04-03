@@ -41,7 +41,7 @@
     <div class="w-px h-full absolute bg-white left-11/16" />
 </div>
 
-<div class="mt-4 text-xl relative">
+<div class="mt-4 text-xl relative h-[74px]">
     <div class="left-0 top-0 absolute">
         0:{formatNum1(secPos)}
     </div>
@@ -59,7 +59,8 @@
 <style lang="scss">
     .animation {
         transition: 100ms all ease;
-        height: 74px;
+        height: 100%;
+        box-sizing: border-box;
 
         border-radius: 0px;
         border-style: solid;

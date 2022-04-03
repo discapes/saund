@@ -57,6 +57,7 @@
 </script>
 
 <iframe
+    height="0"
     allow="autoplay"
     id="soundcloud"
     src="https://w.soundcloud.com/player/?url={song.url}"
