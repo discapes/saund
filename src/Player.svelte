@@ -1,5 +1,6 @@
 <script>
     export let status;
+    export let gameOver;
     export let toggle;
 
     let secDur = 0;
@@ -23,7 +24,7 @@
 >
     <div
         class="h-full absolute bg-white/30 overflow-hidden"
-        style="width:{(secDur / 16) * 100}%"
+        style="width:{(secDur / Math.max(16, secDur)) * 100}%"
     >
         <div
             style="width: {(secPos / secDur) *
@@ -34,22 +35,24 @@
                 : 'from-correct-500/50 via-incorrect-500/50 to-incorrect-500/50'}"
         />
     </div>
-    <div class="w-px h-full absolute bg-white left-1/16" />
-    <div class="w-px h-full absolute bg-white left-2/16" />
-    <div class="w-px h-full absolute bg-white left-4/16" />
-    <div class="w-px h-full absolute bg-white left-7/16" />
-    <div class="w-px h-full absolute bg-white left-11/16" />
+    {#if !gameOver}
+        <div class="w-px h-full absolute bg-white left-1/16" />
+        <div class="w-px h-full absolute bg-white left-2/16" />
+        <div class="w-px h-full absolute bg-white left-4/16" />
+        <div class="w-px h-full absolute bg-white left-7/16" />
+        <div class="w-px h-full absolute bg-white left-11/16" />
+    {/if}
 </div>
 
 <div class="mt-4 text-xl relative h-[74px]">
     <div class="left-0 top-0 absolute">
-        0:{formatNum1(secPos)}
+        {formatNum2(secPos)}
     </div>
     <button
         class="animation"
         disabled={!status.ready}
         class:playing={!status.paused}
-        on:click={toggle}
+        on:click|preventDefault={toggle}
     />
     <div class="right-0 top-0 absolute">
         {formatNum2(secDur)}

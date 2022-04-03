@@ -108,13 +108,14 @@
     function end() {
         music.setDur(songInfo.duration);
         game.over = true;
+        music.setResetOnToggle(true);
         music.seek(0);
         music.play();
         tick().then(() => retryButton.focus());
         tip = "Press Enter to go to next song";
     }
     function toggle() {
-        tip = "Select with arrow keys or mouse, press Enter to confirm/skip";
+        if (!game.over) tip = "Select with arrow keys or mouse, press Enter to confirm/skip";
         music.toggle();
         music.setResetOnToggle(true);
     }
@@ -153,7 +154,7 @@
 </script>
 
 <svelte:window on:keydown={kd} on:click={clk} />
-<div class="w-full max-w-xl scale-[85%] my-[-10vh]">
+<div class="w-full max-w-xl">
     <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {submit} {game} />
@@ -162,7 +163,7 @@
         {tip}
     </div>
     {#if music}
-        <Player {status} {toggle} />
+        <Player {status} {toggle} gameOver={game.over}/>
     {/if}
     <div class="my-4">
         {#if !game.over}

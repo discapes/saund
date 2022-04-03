@@ -53,6 +53,8 @@
             status.ready = true;
             wid.getCurrentSound((cs) => (info = cs));
         });
+
+        wid.bind(SC.Widget.Events.FINISH, pause);
     });
 </script>
 

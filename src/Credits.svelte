@@ -3,9 +3,15 @@
     export let height;
     export let retryButton;
     export let artwork;
+
+    let nameHeight;
+
+    function blur() {
+		setTimeout(() => retryButton.focus(), 0);
+	}
 </script>
 
-<div class="flex" style="height: {height}px">
+<div class="flex" style="height: {Math.max(height,nameHeight+10)}px">
     <div
         class="
 bg-gradient-to-r from-primary2-500/70 to-secondary2-500/40 text-left border grow h-full
@@ -13,8 +19,8 @@ bg-gradient-to-r from-primary2-500/70 to-secondary2-500/40 text-left border grow
     >
         <a href={song.url} title="Listen to {song.name} on SoundCloud"
             ><div class="flex items-center h-full">
-                <img src={artwork} alt={song.name} style="height: calc(100% - 1px)"/>
-                <div class="flex-1 mx-3 text-white">
+                <img src={artwork} alt={song.name} style="height: calc(100% - 1px); max-height: 100px"/>
+                <div class="flex-1 mx-3 text-white" bind:clientHeight={nameHeight}>
                     <p>{song.name.split(" - ")[1]}</p>
                     <p class="text-sm ">{song.name.split(" - ")[0]}</p>
                 </div>
@@ -64,6 +70,7 @@ bg-submit-700/50
 touch:active:bg-submit-700/70
 mouse:hover:bg-submit-700/70"
         bind:this={retryButton}
+        on:blur={blur}
         on:click={() => location.reload()}>Retry</button
     >
 </div>

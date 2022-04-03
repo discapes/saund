@@ -1,5 +1,4 @@
 <script>
-	import { tick } from "svelte";
 	export let game;
 	export let submit;
 
@@ -10,7 +9,7 @@
 		}
 	}
 	function blur() {
-		setTimeout(() => game.fields[game.guesses].focus(), 0);
+		if (!game.over) setTimeout(() => game.fields[game.guesses].focus(), 0);
 	}
 
 	let bgHeight;
