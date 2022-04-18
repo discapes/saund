@@ -1,5 +1,5 @@
-# heardle-minimal
-Demo: https://discapes.github.io/heardle-minimal/
+# saund
+Demo: https://saund.pages.dev
 
 ## Get started
 
