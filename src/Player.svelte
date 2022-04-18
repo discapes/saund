@@ -1,7 +1,4 @@
 <script>
-import Game from "./Game.svelte";
-
-
     export let status;
     export let gameOver;
     export let toggle;
