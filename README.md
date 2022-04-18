@@ -1,5 +1,5 @@
 # saund
-Demo: https://saund.pages.dev
+Latest build: https://saund.pages.dev
 
 ## Get started
 
