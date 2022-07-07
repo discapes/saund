@@ -156,7 +156,7 @@
 
 <svelte:window on:keydown={kd} on:click={clk} />
 <div class="w-full max-w-xl p-2">
-    <h1 class="text-5xl font-bold m-4">Hello hearld</h1>
+    <h1 class="text-5xl font-bold m-4">🎵 Saund 🎵</h1>
     <Music {song} bind:info={songInfo} bind:this={music} bind:status />
     <Fields {submit} {game} />
 
